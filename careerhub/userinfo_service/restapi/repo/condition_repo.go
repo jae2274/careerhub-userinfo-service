@@ -12,10 +12,10 @@ import (
 )
 
 type ConditionRepo interface {
-	InitConditions(ctx context.Context, userId string) error
+	InitDesiredCondition(ctx context.Context, userId string) (bool, error)
 	FindByUserId(ctx context.Context, userId string) (*condition.DesiredCondition, error)
 	FindByUserIdAndUUID(ctx context.Context, userId string, conditionId string) (*condition.Condition, error)
-	InsertCondition(ctx context.Context, userId string, limitCount int, newCondition *condition.Condition) (bool, error)
+	InsertCondition(ctx context.Context, userId string, limitCount uint, newCondition *condition.Condition) (bool, error)
 	UpdateCondition(ctx context.Context, userId string, updateCondition *condition.Condition) (bool, error)
 	DeleteCondition(ctx context.Context, userId string, conditionId string) (bool, error)
 }
@@ -30,9 +30,10 @@ func NewConditionRepo(col *mongo.Collection) ConditionRepo {
 	}
 }
 
-func (r *ConditionRepoImpl) InitConditions(ctx context.Context, userId string) error {
+func (r *ConditionRepoImpl) InitDesiredCondition(ctx context.Context, userId string) (bool, error) {
 	condition := condition.DesiredCondition{
 		UserId:     userId,
+		Conditions: []condition.Condition{},
 		InsertedAt: time.Now(),
 	}
 
@@ -40,13 +41,13 @@ func (r *ConditionRepoImpl) InitConditions(ctx context.Context, userId string) e
 
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
-			return nil
+			return false, nil
 		}
 
-		return err
+		return false, err
 	}
 
-	return nil
+	return true, nil
 }
 
 func (r *ConditionRepoImpl) FindByUserId(ctx context.Context, userId string) (*condition.DesiredCondition, error) {
@@ -90,12 +91,17 @@ func (r *ConditionRepoImpl) FindByUserIdAndUUID(ctx context.Context, userId stri
 	return nil, terr.New(fmt.Sprintf("condition not found: userId=%s, conditionId=%s", userId, conditionId))
 }
 
-func (r *ConditionRepoImpl) InsertCondition(ctx context.Context, userId string, limitCount int, newCondition *condition.Condition) (bool, error) {
+func (r *ConditionRepoImpl) InsertCondition(ctx context.Context, userId string, limitCount uint, newCondition *condition.Condition) (bool, error) {
+	if limitCount == 0 {
+		return false, terr.New("limitCount must be greater than 0")
+	}
+
 	filter := bson.M{
 		condition.UserIdField: userId, //해당 조건은 InitConditions 함수에서 생성되므로 userId가 존재한다는 것을 보장함
-		fmt.Sprintf("%s.%d", condition.ConditionsField, limitCount): bson.M{"$exists": false}, //갯수 제한
+		fmt.Sprintf("%s.%d", condition.ConditionsField, limitCount-1): bson.M{"$exists": false},                //갯수 제한
+		condition.Conditions_ConditionIdField:                         bson.M{"$ne": newCondition.ConditionId}, //중복 방지
 	}
-	update := bson.M{"$push": bson.M{condition.Conditions_ConditionIdField: newCondition}}
+	update := bson.M{"$push": bson.M{condition.ConditionsField: newCondition}}
 
 	result, err := r.col.UpdateOne(ctx, filter, update)
 
@@ -135,7 +141,7 @@ func (r *ConditionRepoImpl) DeleteCondition(ctx context.Context, userId string, 
 		condition.UserIdField:                 userId,
 		condition.Conditions_ConditionIdField: conditionId,
 	}
-	update := bson.M{"$pull": bson.M{condition.Conditions_ConditionIdField: bson.M{"conditionId": conditionId}}}
+	update := bson.M{"$pull": bson.M{condition.ConditionsField: bson.M{condition.ConditionIdField: conditionId}}}
 
 	result, err := r.col.UpdateOne(ctx, filter, update)
 

@@ -13,6 +13,7 @@ import (
 const (
 	UserIdField                 = "userId"
 	Conditions_ConditionIdField = "conditions.conditionId"
+	ConditionIdField            = "conditionId"
 	ConditionsField             = "conditions"
 )
 
