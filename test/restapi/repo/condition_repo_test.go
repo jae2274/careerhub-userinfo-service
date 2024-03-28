@@ -256,6 +256,20 @@ func TestConditionRepo(t *testing.T) {
 		require.Error(t, err) // Duplicate key error
 		require.False(t, success)
 	})
+
+	t.Run("limitCount can't be zero", func(t *testing.T) {
+		conditionRepo := initConditionRepo(t)
+		ctx := context.TODO()
+
+		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		require.NoError(t, err)
+		require.True(t, success)
+
+		success, err = conditionRepo.InsertCondition(ctx, userId, 0, newCondition)
+		require.Error(t, err)
+		require.Equal(t, repo.ErrNonZero, err)
+		require.False(t, success)
+	})
 }
 
 func initConditionRepo(t *testing.T) repo.ConditionRepo {

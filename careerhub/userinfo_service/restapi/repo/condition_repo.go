@@ -91,9 +91,11 @@ func (r *ConditionRepoImpl) FindByUserIdAndUUID(ctx context.Context, userId stri
 	return nil, terr.New(fmt.Sprintf("condition not found: userId=%s, conditionId=%s", userId, conditionId))
 }
 
+var ErrNonZero = fmt.Errorf("limitCount must be greater than 0")
+
 func (r *ConditionRepoImpl) InsertCondition(ctx context.Context, userId string, limitCount uint, newCondition *condition.Condition) (bool, error) {
 	if limitCount == 0 {
-		return false, terr.New("limitCount must be greater than 0")
+		return false, ErrNonZero
 	}
 
 	filter := bson.M{
