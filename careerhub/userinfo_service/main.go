@@ -21,10 +21,11 @@ const (
 
 func main() {
 	ctx := context.Background()
-	envVars, err := vars.Variables()
+
+	err := initLogger(ctx)
 	checkErr(ctx, err)
 
-	err = initLogger(ctx)
+	envVars, err := vars.Variables()
 	checkErr(ctx, err)
 
 	db, err := mongocfg.NewDatabase(envVars.MongoUri, envVars.DbName, envVars.DBUser)
