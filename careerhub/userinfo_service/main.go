@@ -24,7 +24,7 @@ func main() {
 	envVars, err := vars.Variables()
 	checkErr(ctx, err)
 
-	err = initLogger(ctx, envVars.PostLogUrl)
+	err = initLogger(ctx)
 	checkErr(ctx, err)
 
 	db, err := mongocfg.NewDatabase(envVars.MongoUri, envVars.DbName, envVars.DBUser)
@@ -44,7 +44,7 @@ func main() {
 	checkErr(ctx, err)
 }
 
-func initLogger(ctx context.Context, postUrl string) error {
+func initLogger(ctx context.Context) error {
 	llog.SetMetadata("service", service)
 	llog.SetMetadata("app", app)
 	llog.SetDefaultContextData(ctxKeyTraceID)
