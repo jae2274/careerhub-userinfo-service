@@ -16,7 +16,6 @@ type Vars struct {
 	DbName          string
 	DBUser          *DBUser
 	RestApiGrpcPort int
-	PostLogUrl      string
 }
 
 type ErrNotExistedVar struct {
@@ -58,11 +57,6 @@ func Variables() (*Vars, error) {
 		return nil, err
 	}
 
-	postLogUrl, err := getFromEnv("POST_LOG_URL")
-	if err != nil {
-		return nil, err
-	}
-
 	restApiGrpcPortInt, err := strconv.ParseInt(restApiGrpcPort, 10, 32)
 	if err != nil {
 		return nil, fmt.Errorf("RESTAPI_GRPC_PORT is not integer.\tREST_API_PORT: %s", restApiGrpcPort)
@@ -73,7 +67,6 @@ func Variables() (*Vars, error) {
 		DBUser:          dbUser,
 		DbName:          dbName,
 		RestApiGrpcPort: int(restApiGrpcPortInt),
-		PostLogUrl:      postLogUrl,
 	}, nil
 }
 
