@@ -26,7 +26,7 @@ func Run(ctx context.Context, grpcPort int, collections map[string]*mongo.Collec
 		return terr.Wrap(err)
 	}
 
-	llog.Msg("RestAPI grpc server is running").Level(llog.INFO).Data("grpcPort", grpcPort).Log(ctx)
+	llog.Msg("Start restapi grpc server").Level(llog.INFO).Data("port", grpcPort).Log(ctx)
 
 	grpcServer := grpc.NewServer()
 	restapi_grpc.RegisterRestApiGrpcServer(grpcServer, restApiService)

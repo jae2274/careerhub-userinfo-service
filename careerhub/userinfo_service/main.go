@@ -19,11 +19,27 @@ const (
 	ctxKeyTraceID = "trace_id"
 )
 
+func initLogger(ctx context.Context) error {
+	llog.SetMetadata("service", service)
+	llog.SetMetadata("app", app)
+	llog.SetDefaultContextData(ctxKeyTraceID)
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return err
+	}
+
+	llog.SetMetadata("hostname", hostname)
+
+	return nil
+}
+
 func main() {
 	ctx := context.Background()
 
 	err := initLogger(ctx)
 	checkErr(ctx, err)
+	llog.Info(ctx, "Start Application")
 
 	envVars, err := vars.Variables()
 	checkErr(ctx, err)
@@ -43,21 +59,6 @@ func main() {
 
 	err = <-runErr
 	checkErr(ctx, err)
-}
-
-func initLogger(ctx context.Context) error {
-	llog.SetMetadata("service", service)
-	llog.SetMetadata("app", app)
-	llog.SetDefaultContextData(ctxKeyTraceID)
-
-	hostname, err := os.Hostname()
-	if err != nil {
-		return err
-	}
-
-	llog.SetMetadata("hostname", hostname)
-
-	return nil
 }
 
 func initCollections(db *mongo.Database) (map[string]*mongo.Collection, error) {
