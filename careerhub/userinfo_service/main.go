@@ -9,6 +9,7 @@ import (
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/vars"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi"
 	"github.com/jae2274/goutils/llog"
+	"github.com/jae2274/goutils/mw"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -16,7 +17,7 @@ const (
 	app     = "userinfo-service"
 	service = "careerhub"
 
-	ctxKeyTraceID = "trace_id"
+	ctxKeyTraceID = string(mw.CtxKeyTraceID)
 )
 
 func initLogger(ctx context.Context) error {
