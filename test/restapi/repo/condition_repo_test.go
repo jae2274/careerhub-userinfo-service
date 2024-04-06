@@ -26,7 +26,7 @@ func TestConditionRepo(t *testing.T) {
 					CategoryName: "test_category_name",
 				},
 			},
-			SkillNames: []string{"test_skill_name"},
+			SkillNames: [][]string{{"test_skill_name"}},
 			MinCareer:  ptr.P(int32(1)),
 			MaxCareer:  ptr.P(int32(2)),
 		},
@@ -42,7 +42,7 @@ func TestConditionRepo(t *testing.T) {
 					CategoryName: "update_category_name",
 				},
 			},
-			SkillNames: []string{"update_skill_name"},
+			SkillNames: [][]string{{"update_skill_name"}},
 			MinCareer:  ptr.P(int32(3)),
 			MaxCareer:  nil,
 		},
@@ -221,7 +221,7 @@ func TestConditionRepo(t *testing.T) {
 		success, err = conditionRepo.InsertCondition(ctx, userId, 2, &condition.Condition{
 			ConditionId:   sameConditionId,
 			ConditionName: "different_condition_name_2",
-			Query:         condition.Query{SkillNames: []string{"test_skill_name"}},
+			Query:         condition.Query{SkillNames: [][]string{{"test_skill_name"}}},
 		})
 		require.NoError(t, err)
 		require.False(t, success)
@@ -251,7 +251,7 @@ func TestConditionRepo(t *testing.T) {
 		success, err = conditionRepo.InsertCondition(ctx, differentUserId, 2, &condition.Condition{
 			ConditionId:   conditionId,
 			ConditionName: "different_condition_name_2",
-			Query:         condition.Query{SkillNames: []string{"test_skill_name"}},
+			Query:         condition.Query{SkillNames: [][]string{{"test_skill_name"}}},
 		})
 		require.Error(t, err) // Duplicate key error
 		require.False(t, success)

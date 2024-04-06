@@ -74,13 +74,19 @@ func convertConditionToGrpc(domainValue *condition.Condition) *restapi_grpc.Cond
 			CategoryName: category.CategoryName,
 		}
 	}
+	skillNames := make([]*restapi_grpc.Skill, len(domainValue.Query.SkillNames))
+	for i, skill := range domainValue.Query.SkillNames {
+		skillNames[i] = &restapi_grpc.Skill{
+			Or: skill,
+		}
+	}
 
 	return &restapi_grpc.Condition{
 		ConditionId:   domainValue.ConditionId,
 		ConditionName: domainValue.ConditionName,
 		Query: &restapi_grpc.Query{
 			Categories: categories,
-			SkillNames: domainValue.Query.SkillNames,
+			SkillNames: skillNames,
 			MinCareer:  domainValue.Query.MinCareer,
 			MaxCareer:  domainValue.Query.MaxCareer,
 		},
@@ -96,12 +102,17 @@ func convertConditionToDomain(grpcValue *restapi_grpc.Condition) *condition.Cond
 		}
 	}
 
+	skillNames := make([][]string, len(grpcValue.Query.SkillNames))
+	for i, skill := range grpcValue.Query.SkillNames {
+		skillNames[i] = skill.Or
+	}
+
 	return &condition.Condition{
 		ConditionId:   grpcValue.ConditionId,
 		ConditionName: grpcValue.ConditionName,
 		Query: condition.Query{
 			Categories: categories,
-			SkillNames: grpcValue.Query.SkillNames,
+			SkillNames: skillNames,
 			MinCareer:  grpcValue.Query.MinCareer,
 			MaxCareer:  grpcValue.Query.MaxCareer,
 		},

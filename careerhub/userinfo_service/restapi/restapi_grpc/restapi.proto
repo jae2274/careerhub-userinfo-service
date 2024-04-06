@@ -28,9 +28,13 @@ message Condition{
 
 message Query{
     repeated Category categories = 1;
-    repeated string skillNames = 2;
+    repeated Skill skillNames = 2;
     optional int32 minCareer = 3;
     optional int32 maxCareer = 4;
+}
+
+message Skill{
+    repeated string Or = 1;
 }
 
 message Category {

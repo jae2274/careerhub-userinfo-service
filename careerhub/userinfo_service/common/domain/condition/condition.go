@@ -32,7 +32,7 @@ type Condition struct {
 
 type Query struct {
 	Categories []*CategoryQuery `bson:"categories"`
-	SkillNames []string         `bson:"skillNames"`
+	SkillNames [][]string       `bson:"skillNames"`
 	MinCareer  *int32           `bson:"minCareer"`
 	MaxCareer  *int32           `bson:"maxCareer"`
 }
