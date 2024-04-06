@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+package careerhub.userinfo_service.suggester_grpc;
+option go_package = "careerhub/userinfo_service/suggester_grpc";
+
+service SuggesterGrpc{
+    rpc StartBatch(StartBatchRequest) returns (StartBatchResponse);
+    rpc GetConditions(google.protobuf.Empty) returns ( GetConditionsResponse);
+    rpc EndBatch(EndBatchRequest) returns (google.protobuf.Empty);
+}
+
+message StartBatchRequest{
+    string batchId = 1;
+}
+
+message StartBatchResponse{
+    int64 afterUnixMilli = 1;
+}
+
+message GetConditionsResponse{
+    repeated Condition conditions = 1;
+}
+
+message EndBatchRequest{
+    string batchId = 1;
+}
+
+message Condition{
+    string userId = 1;
+    string conditionId = 2;
+    string conditionName = 3;
+    Query query = 4;
+}
+
+message Query{
+    repeated Category categories = 1;
+    repeated Skill skillNames = 2;
+    optional int32 minCareer = 3;
+    optional int32 maxCareer = 4;
+}
+
+message Skill{
+    repeated string Or = 1;
+}
+
+message Category {
+    string site = 1;
+    string categoryName = 2;
+}
