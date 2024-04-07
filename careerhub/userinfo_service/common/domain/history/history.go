@@ -12,7 +12,9 @@ import (
 )
 
 const (
-	BatchIdField = "batchId"
+	BatchIdField    = "batchId"
+	BatchStateField = "batchState"
+	EndTimeField    = "endTime"
 )
 
 type BatchStateValues struct{}

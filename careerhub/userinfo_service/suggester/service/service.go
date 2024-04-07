@@ -44,13 +44,13 @@ func (s *SuggesterService) UpdateFailed(ctx context.Context, batchIds []string) 
 	return nil
 }
 
-func (s *SuggesterService) StartBatch(ctx context.Context, batchId string) (*time.Time, error) {
+func (s *SuggesterService) StartBatch(ctx context.Context, batchId string, startTime time.Time) (*time.Time, error) {
 	lastSuccessedDate, err := s.historyRepo.FindLastSuccessedDate(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.historyRepo.InsertHistory(ctx, batchId)
+	err = s.historyRepo.InsertHistory(ctx, batchId, startTime)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (s *SuggesterService) StartBatch(ctx context.Context, batchId string) (*tim
 	return lastSuccessedDate, nil
 }
 
-func (s *SuggesterService) GetDesiredConditions(ctx context.Context) ([]condition.DesiredCondition, error) {
+func (s *SuggesterService) GetDesiredConditions(ctx context.Context) ([]*condition.DesiredCondition, error) {
 	return s.conditionRepo.GetDesiredConditions(ctx)
 }
 
@@ -66,6 +66,6 @@ func (s *SuggesterService) InsertSuggestion(ctx context.Context, suggestion *sug
 	return s.suggestionRepo.InsertSuggestion(ctx, suggestion)
 }
 
-func (s *SuggesterService) EndBatch(ctx context.Context, batchId string) error {
-	return s.historyRepo.UpdateSuccessed(ctx, batchId)
+func (s *SuggesterService) EndBatch(ctx context.Context, batchId string, endTime time.Time) error {
+	return s.historyRepo.UpdateSuccessed(ctx, batchId, endTime)
 }

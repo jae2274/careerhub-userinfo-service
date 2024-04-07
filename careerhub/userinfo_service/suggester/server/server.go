@@ -27,10 +27,9 @@ func (s *SuggesterGrpcServer) StartBatch(ctx context.Context, req *suggester_grp
 	if err != nil {
 		return nil, err
 	}
-
 	s.service.UpdateFailed(ctx, batchIds)
 
-	lastWorkedDate, err := s.service.StartBatch(ctx, req.BatchId)
+	lastWorkedDate, err := s.service.StartBatch(ctx, req.BatchId, time.UnixMilli(req.StartTimeUnixMilli))
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +55,7 @@ func (s *SuggesterGrpcServer) GetConditions(ctx context.Context, _ *emptypb.Empt
 	}, nil
 }
 
-func convertDesiredConditionsToGrpc(desiredConditions []condition.DesiredCondition) []*suggester_grpc.Condition {
+func convertDesiredConditionsToGrpc(desiredConditions []*condition.DesiredCondition) []*suggester_grpc.Condition {
 	var grpcConditions []*suggester_grpc.Condition
 
 	for _, desiredCondition := range desiredConditions {
@@ -127,5 +126,5 @@ func convertSuggestionToDomain(sg *suggester_grpc.Suggestion) *suggestion.Sugges
 }
 
 func (s *SuggesterGrpcServer) EndBatch(ctx context.Context, req *suggester_grpc.EndBatchRequest) (*emptypb.Empty, error) {
-	return &emptypb.Empty{}, s.service.EndBatch(ctx, req.BatchId)
+	return &emptypb.Empty{}, s.service.EndBatch(ctx, req.BatchId, time.UnixMilli(req.EndTimeUnixMilli))
 }
