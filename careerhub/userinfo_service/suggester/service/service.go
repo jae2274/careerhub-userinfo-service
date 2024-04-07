@@ -23,11 +23,21 @@ func NewSuggesterService(conditionRepo repo.ConditionRepo, historyRepo repo.Hist
 	}
 }
 
-func (s *SuggesterService) FindWorkingBatchIds(ctx context.Context) ([]string, error) {
-	return s.historyRepo.FindWorkingBatchIds(ctx)
+func (s *SuggesterService) UpdateWorkingToFailed(ctx context.Context) error {
+	batchIds, err := s.historyRepo.FindWorkingBatchIds(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = s.updateFailed(ctx, batchIds)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (s *SuggesterService) UpdateFailed(ctx context.Context, batchIds []string) error {
+func (s *SuggesterService) updateFailed(ctx context.Context, batchIds []string) error {
 	if len(batchIds) == 0 {
 		return nil
 	}

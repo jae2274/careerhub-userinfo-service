@@ -23,11 +23,7 @@ func NewSuggesterGrpcServer(service *service.SuggesterService) *SuggesterGrpcSer
 }
 
 func (s *SuggesterGrpcServer) StartBatch(ctx context.Context, req *suggester_grpc.StartBatchRequest) (*suggester_grpc.StartBatchResponse, error) {
-	batchIds, err := s.service.FindWorkingBatchIds(ctx)
-	if err != nil {
-		return nil, err
-	}
-	s.service.UpdateFailed(ctx, batchIds)
+	s.service.UpdateWorkingToFailed(ctx)
 
 	lastWorkedDate, err := s.service.StartBatch(ctx, req.BatchId, time.UnixMilli(req.StartTimeUnixMilli))
 	if err != nil {
