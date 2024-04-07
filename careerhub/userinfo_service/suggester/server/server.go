@@ -2,38 +2,42 @@ package server
 
 import (
 	"context"
+	"time"
 
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/condition"
-	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/repo"
+	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/suggestion"
+	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/service"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/suggester_grpc"
-	"github.com/jae2274/goutils/terr"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type SuggesterGrpcServer struct {
-	conditionRepo repo.ConditionRepo
-	historyRepo   repo.HistoryRepo
+	service *service.SuggesterService
 	suggester_grpc.UnimplementedSuggesterGrpcServer
 }
 
-func NewSuggesterGrpcServer(conditionRepo repo.ConditionRepo, historyRepo repo.HistoryRepo) *SuggesterGrpcServer {
+func NewSuggesterGrpcServer(service *service.SuggesterService) *SuggesterGrpcServer {
 	return &SuggesterGrpcServer{
-		conditionRepo: conditionRepo,
-		historyRepo:   historyRepo,
+		service: service,
 	}
 }
 
 func (s *SuggesterGrpcServer) StartBatch(ctx context.Context, req *suggester_grpc.StartBatchRequest) (*suggester_grpc.StartBatchResponse, error) {
-	lastWorkedDate, err := s.historyRepo.GetLastSuccessDate(ctx)
+	batchIds, err := s.service.FindWorkingBatchIds(ctx)
 	if err != nil {
-		return nil, terr.Wrap(err)
+		return nil, err
 	}
 
-	err = s.historyRepo.InsertHistory(ctx, req.BatchId)
+	s.service.UpdateFailed(ctx, batchIds)
+
+	lastWorkedDate, err := s.service.StartBatch(ctx, req.BatchId)
 	if err != nil {
-		return nil, terr.Wrap(err)
+		return nil, err
+	}
+
+	if lastWorkedDate == nil {
+		yesterday := time.Now().Add(-24 * time.Hour)
+		lastWorkedDate = &yesterday
 	}
 
 	return &suggester_grpc.StartBatchResponse{
@@ -42,9 +46,9 @@ func (s *SuggesterGrpcServer) StartBatch(ctx context.Context, req *suggester_grp
 }
 
 func (s *SuggesterGrpcServer) GetConditions(ctx context.Context, _ *emptypb.Empty) (*suggester_grpc.GetConditionsResponse, error) {
-	desiredConditions, err := s.conditionRepo.GetConditions(ctx)
+	desiredConditions, err := s.service.GetDesiredConditions(ctx)
 	if err != nil {
-		return nil, terr.Wrap(err)
+		return nil, err
 	}
 
 	return &suggester_grpc.GetConditionsResponse{
@@ -90,15 +94,38 @@ func convertDesiredConditionsToGrpc(desiredConditions []condition.DesiredConditi
 }
 
 func (s *SuggesterGrpcServer) ReceiveSuggestion(ctx context.Context, req *suggester_grpc.Suggestion) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReceiveSuggestions not implemented")
+	return &emptypb.Empty{}, s.service.InsertSuggestion(ctx, convertSuggestionToDomain(req))
+}
+
+func convertSuggestionToDomain(sg *suggester_grpc.Suggestion) *suggestion.Suggestion {
+	postings := make([]*suggestion.Posting, len(sg.Postings))
+	for i, posting := range sg.Postings {
+		postings[i] = &suggestion.Posting{
+			PostingId: &suggestion.PostingId{
+				Site:      posting.PostingId.Site,
+				PostingId: posting.PostingId.PostingId,
+			},
+			Title:       posting.Title,
+			CompanyId:   posting.CompanyId,
+			CompanyName: posting.CompanyName,
+			Info: &suggestion.PostingInfo{
+				Categories: posting.PostingInfo.Categories,
+				SkillNames: posting.PostingInfo.SkillNames,
+				MinCareer:  posting.PostingInfo.MinCareer,
+				MaxCareer:  posting.PostingInfo.MaxCareer,
+			},
+		}
+	}
+
+	return &suggestion.Suggestion{
+		BatchId:       sg.BatchId,
+		UserId:        sg.UserId,
+		ConditionId:   sg.ConditionId,
+		ConditionName: sg.ConditionName,
+		Postings:      postings,
+	}
 }
 
 func (s *SuggesterGrpcServer) EndBatch(ctx context.Context, req *suggester_grpc.EndBatchRequest) (*emptypb.Empty, error) {
-	err := s.historyRepo.UpdateHistory(ctx, req.BatchId)
-
-	if err != nil {
-		return nil, terr.Wrap(err)
-	}
-
-	return &emptypb.Empty{}, nil
+	return &emptypb.Empty{}, s.service.EndBatch(ctx, req.BatchId)
 }

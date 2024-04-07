@@ -20,26 +20,13 @@ type BatchStateValues struct{}
 type BatchState = enum.Enum[BatchStateValues]
 
 const (
-	WORKING  = BatchState("WORKING")
-	FINISHED = BatchState("FINISHED")
-	FAILED   = BatchState("FAILED")
+	WORKING   = BatchState("WORKING")
+	SUCCESSED = BatchState("SUCCESSED")
+	FAILED    = BatchState("FAILED")
 )
 
 func (BatchStateValues) Values() []string {
-	return []string{string(WORKING), string(FINISHED), string(FAILED)}
-}
-
-type MailerStateValues struct{}
-
-type MailerState = enum.Enum[MailerStateValues]
-
-const (
-	NOT_SENT = MailerState("NOT_SENT")
-	ALL_SENT = MailerState("ALL_SENT")
-)
-
-func (MailerStateValues) Values() []string {
-	return []string{string(NOT_SENT), string(ALL_SENT)}
+	return []string{string(WORKING), string(SUCCESSED), string(FAILED)}
 }
 
 type History struct {
@@ -50,8 +37,7 @@ type History struct {
 	StartTime  time.Time  `bson:"startTime"`
 	EndTime    *time.Time `bson:"endTime"`
 
-	MailerState MailerState `bson:"mailerState"`
-	InsertedAt  time.Time   `bson:"insertedAt"`
+	InsertedAt time.Time `bson:"insertedAt"`
 }
 
 func (*History) Collection() string {

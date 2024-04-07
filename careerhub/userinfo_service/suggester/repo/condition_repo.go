@@ -7,5 +7,5 @@ import (
 )
 
 type ConditionRepo interface {
-	GetConditions(context.Context) ([]condition.DesiredCondition, error)
+	GetDesiredConditions(context.Context) ([]condition.DesiredCondition, error)
 }

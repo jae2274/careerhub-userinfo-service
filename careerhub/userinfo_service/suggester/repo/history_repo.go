@@ -6,7 +6,9 @@ import (
 )
 
 type HistoryRepo interface {
-	GetLastSuccessDate(context.Context) (time.Time, error)
+	FindWorkingBatchIds(context.Context) ([]string, error)
+	UpdateFailed(context.Context, []string) error
+	FindLastSuccessedDate(context.Context) (*time.Time, error)
 	InsertHistory(context.Context, string) error
-	UpdateHistory(context.Context, string) error
+	UpdateSuccessed(context.Context, string) error
 }
