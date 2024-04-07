@@ -7,6 +7,7 @@ option go_package = "careerhub/userinfo_service/suggester_grpc";
 service SuggesterGrpc{
     rpc StartBatch(StartBatchRequest) returns (StartBatchResponse);
     rpc GetConditions(google.protobuf.Empty) returns ( GetConditionsResponse);
+    rpc ReceiveSuggestion(Suggestion) returns (google.protobuf.Empty);
     rpc EndBatch(EndBatchRequest) returns (google.protobuf.Empty);
 }
 
@@ -47,4 +48,32 @@ message Skill{
 message Category {
     string site = 1;
     string categoryName = 2;
+}
+
+message Suggestion{
+    string batchId = 1;
+    string userId = 2;
+    string conditionId = 3;
+    string conditionName = 4;
+    repeated Posting postings = 5;
+}
+
+message Posting{
+    PostingId postingId = 1;
+    string title = 2;
+    string companyId = 3;
+    string companyName = 4;
+    PostingInfo postingInfo = 5;
+}
+
+message PostingId{
+    string site = 1;
+    string postingId = 2;
+}
+
+message PostingInfo{
+    repeated string categories = 1;
+    repeated string skillNames = 2;
+    optional int32 minCareer = 3;
+    optional int32 maxCareer = 4;
 }

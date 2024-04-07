@@ -25,6 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type SuggesterGrpcClient interface {
 	StartBatch(ctx context.Context, in *StartBatchRequest, opts ...grpc.CallOption) (*StartBatchResponse, error)
 	GetConditions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetConditionsResponse, error)
+	ReceiveSuggestion(ctx context.Context, in *Suggestion, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	EndBatch(ctx context.Context, in *EndBatchRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -54,6 +55,15 @@ func (c *suggesterGrpcClient) GetConditions(ctx context.Context, in *emptypb.Emp
 	return out, nil
 }
 
+func (c *suggesterGrpcClient) ReceiveSuggestion(ctx context.Context, in *Suggestion, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.suggester_grpc.SuggesterGrpc/ReceiveSuggestion", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *suggesterGrpcClient) EndBatch(ctx context.Context, in *EndBatchRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.suggester_grpc.SuggesterGrpc/EndBatch", in, out, opts...)
@@ -69,6 +79,7 @@ func (c *suggesterGrpcClient) EndBatch(ctx context.Context, in *EndBatchRequest,
 type SuggesterGrpcServer interface {
 	StartBatch(context.Context, *StartBatchRequest) (*StartBatchResponse, error)
 	GetConditions(context.Context, *emptypb.Empty) (*GetConditionsResponse, error)
+	ReceiveSuggestion(context.Context, *Suggestion) (*emptypb.Empty, error)
 	EndBatch(context.Context, *EndBatchRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedSuggesterGrpcServer()
 }
@@ -82,6 +93,9 @@ func (UnimplementedSuggesterGrpcServer) StartBatch(context.Context, *StartBatchR
 }
 func (UnimplementedSuggesterGrpcServer) GetConditions(context.Context, *emptypb.Empty) (*GetConditionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConditions not implemented")
+}
+func (UnimplementedSuggesterGrpcServer) ReceiveSuggestion(context.Context, *Suggestion) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReceiveSuggestion not implemented")
 }
 func (UnimplementedSuggesterGrpcServer) EndBatch(context.Context, *EndBatchRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EndBatch not implemented")
@@ -135,6 +149,24 @@ func _SuggesterGrpc_GetConditions_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SuggesterGrpc_ReceiveSuggestion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Suggestion)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SuggesterGrpcServer).ReceiveSuggestion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/careerhub.userinfo_service.suggester_grpc.SuggesterGrpc/ReceiveSuggestion",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SuggesterGrpcServer).ReceiveSuggestion(ctx, req.(*Suggestion))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SuggesterGrpc_EndBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EndBatchRequest)
 	if err := dec(in); err != nil {
@@ -167,6 +199,10 @@ var SuggesterGrpc_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConditions",
 			Handler:    _SuggesterGrpc_GetConditions_Handler,
+		},
+		{
+			MethodName: "ReceiveSuggestion",
+			Handler:    _SuggesterGrpc_ReceiveSuggestion_Handler,
 		},
 		{
 			MethodName: "EndBatch",

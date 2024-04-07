@@ -7,6 +7,8 @@ import (
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/repo"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/suggester_grpc"
 	"github.com/jae2274/goutils/terr"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -85,6 +87,10 @@ func convertDesiredConditionsToGrpc(desiredConditions []condition.DesiredConditi
 	}
 
 	return grpcConditions
+}
+
+func (s *SuggesterGrpcServer) ReceiveSuggestion(ctx context.Context, req *suggester_grpc.Suggestion) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReceiveSuggestions not implemented")
 }
 
 func (s *SuggesterGrpcServer) EndBatch(ctx context.Context, req *suggester_grpc.EndBatchRequest) (*emptypb.Empty, error) {
