@@ -7,7 +7,6 @@ import (
 
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/repo"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/server"
-	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/service"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/suggester_grpc"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/utils"
 	"github.com/jae2274/goutils/llog"
@@ -18,10 +17,7 @@ import (
 
 func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
 	conditionRepo := repo.NewConditionRepo(db)
-	suggestionRepo := repo.NewSuggestionRepo(db)
-	historyRepo := repo.NewHistoryRepo(db)
-	service := service.NewSuggesterService(conditionRepo, historyRepo, suggestionRepo)
-	suggesterGrpcserver := server.NewSuggesterGrpcServer(service)
+	suggesterGrpcserver := server.NewSuggesterGrpcServer(conditionRepo)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
@@ -31,7 +27,7 @@ func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
 	llog.Msg("Start suggester grpc server").Level(llog.INFO).Data("port", grpcPort).Log(ctx)
 
 	grpcServer := grpc.NewServer(utils.Middlewares()...)
-	suggester_grpc.RegisterSuggesterGrpcServer(grpcServer, suggesterGrpcserver)
+	suggester_grpc.RegisterUserinfoServer(grpcServer, suggesterGrpcserver)
 
 	err = grpcServer.Serve(listener)
 	if err != nil {
