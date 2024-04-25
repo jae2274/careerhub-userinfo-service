@@ -20,18 +20,19 @@ func NewRestApiGrpcServer(conditionService service.ConditionService) restapi_grp
 }
 
 func (r *RestApiGrpcServer) FindConditions(ctx context.Context, req *restapi_grpc.FindConditionsRequest) (*restapi_grpc.Conditions, error) {
-	conditions, err := r.conditionService.FindByUserId(ctx, req.UserId)
+	desiredCondition, err := r.conditionService.FindByUserId(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
 
-	response := make([]*restapi_grpc.Condition, len(conditions))
-	for i, condition := range conditions {
-		response[i] = convertConditionToGrpc(&condition)
+	response := make([]*restapi_grpc.Condition, len(desiredCondition.Conditions))
+	for i, condition := range desiredCondition.Conditions {
+		response[i] = convertConditionToGrpc(condition)
 	}
 
 	return &restapi_grpc.Conditions{
-		Conditions: response,
+		Conditions:  response,
+		AgreeToMail: desiredCondition.AgreeToMail,
 	}, nil
 }
 func (r *RestApiGrpcServer) FindCondition(ctx context.Context, req *restapi_grpc.FindConditionRequest) (*restapi_grpc.Condition, error) {
@@ -43,7 +44,7 @@ func (r *RestApiGrpcServer) FindCondition(ctx context.Context, req *restapi_grpc
 	return convertConditionToGrpc(condition), nil
 }
 func (r *RestApiGrpcServer) AddCondition(ctx context.Context, req *restapi_grpc.AddConditionRequest) (*restapi_grpc.IsSuccess, error) {
-	newCondition := convertConditionToDomain(req.Condition)
+	newCondition := convertConditionToDomain("", req.Condition.ConditionName, req.Condition.Query)
 	success, err := r.conditionService.InsertCondition(ctx, req.UserId, uint(req.LimitCount), newCondition)
 
 	return &restapi_grpc.IsSuccess{
@@ -51,7 +52,7 @@ func (r *RestApiGrpcServer) AddCondition(ctx context.Context, req *restapi_grpc.
 	}, err
 }
 func (r *RestApiGrpcServer) UpdateCondition(ctx context.Context, req *restapi_grpc.UpdateConditionRequest) (*restapi_grpc.IsSuccess, error) {
-	updateCondition := convertConditionToDomain(req.Condition)
+	updateCondition := convertConditionToDomain(req.Condition.ConditionId, req.Condition.ConditionName, req.Condition.Query)
 	success, err := r.conditionService.UpdateCondition(ctx, req.UserId, updateCondition)
 
 	return &restapi_grpc.IsSuccess{
@@ -93,28 +94,32 @@ func convertConditionToGrpc(domainValue *condition.Condition) *restapi_grpc.Cond
 	}
 }
 
-func convertConditionToDomain(grpcValue *restapi_grpc.Condition) *condition.Condition {
-	categories := make([]*condition.CategoryQuery, len(grpcValue.Query.Categories))
-	for i, category := range grpcValue.Query.Categories {
+func convertConditionToDomain(conditionId, conditionName string, grpcValue *restapi_grpc.Query) *condition.Condition {
+	return &condition.Condition{
+		ConditionId:   conditionId,
+		ConditionName: conditionName,
+		Query:         convertQueryToDomain(grpcValue),
+	}
+}
+
+func convertQueryToDomain(grpcValue *restapi_grpc.Query) *condition.Query {
+	categories := make([]*condition.CategoryQuery, len(grpcValue.Categories))
+	for i, category := range grpcValue.Categories {
 		categories[i] = &condition.CategoryQuery{
 			Site:         category.Site,
 			CategoryName: category.CategoryName,
 		}
 	}
 
-	skillNames := make([][]string, len(grpcValue.Query.SkillNames))
-	for i, skill := range grpcValue.Query.SkillNames {
+	skillNames := make([][]string, len(grpcValue.SkillNames))
+	for i, skill := range grpcValue.SkillNames {
 		skillNames[i] = skill.Or
 	}
 
-	return &condition.Condition{
-		ConditionId:   grpcValue.ConditionId,
-		ConditionName: grpcValue.ConditionName,
-		Query: condition.Query{
-			Categories: categories,
-			SkillNames: skillNames,
-			MinCareer:  grpcValue.Query.MinCareer,
-			MaxCareer:  grpcValue.Query.MaxCareer,
-		},
+	return &condition.Query{
+		Categories: categories,
+		SkillNames: skillNames,
+		MinCareer:  grpcValue.MinCareer,
+		MaxCareer:  grpcValue.MaxCareer,
 	}
 }

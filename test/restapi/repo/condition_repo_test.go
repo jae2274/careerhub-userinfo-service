@@ -14,39 +14,6 @@ import (
 
 func TestConditionRepo(t *testing.T) {
 	userId := "test_user_id"
-	conditionId := "test_condition_id"
-
-	newCondition := &condition.Condition{
-		ConditionId:   conditionId,
-		ConditionName: "test_condition_name",
-		Query: condition.Query{
-			Categories: []*condition.CategoryQuery{
-				{
-					Site:         "test_site",
-					CategoryName: "test_category_name",
-				},
-			},
-			SkillNames: [][]string{{"test_skill_name"}},
-			MinCareer:  ptr.P(int32(1)),
-			MaxCareer:  ptr.P(int32(2)),
-		},
-	}
-
-	updatedCondition := &condition.Condition{
-		ConditionId:   conditionId,
-		ConditionName: "update_condition_name",
-		Query: condition.Query{
-			Categories: []*condition.CategoryQuery{
-				{
-					Site:         "update_site",
-					CategoryName: "update_category_name",
-				},
-			},
-			SkillNames: [][]string{{"update_skill_name"}},
-			MinCareer:  ptr.P(int32(3)),
-			MaxCareer:  nil,
-		},
-	}
 
 	t.Run("FindByUserId without InitConditions", func(t *testing.T) {
 		conditionRepo := initConditionRepo(t)
@@ -75,11 +42,12 @@ func TestConditionRepo(t *testing.T) {
 		checkSimilarTimes(t, now, desiredCondition.InsertedAt)
 	})
 
+	nonExistedConditionId := "non_existed_condition_id"
 	t.Run("FindByUserIdAndUUID without InsertCondition", func(t *testing.T) {
 		conditionRepo := initConditionRepo(t)
 		ctx := context.TODO()
 
-		condition, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, conditionId)
+		condition, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, nonExistedConditionId)
 		require.NoError(t, err)
 		require.Nil(t, condition)
 	})
@@ -92,14 +60,15 @@ func TestConditionRepo(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, success)
 
-		success, err = conditionRepo.InsertCondition(ctx, userId, 1, newCondition)
+		savedCondition := newCondition()
+		success, err = conditionRepo.InsertCondition(ctx, userId, 1, savedCondition)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, conditionId)
+		finded, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, savedCondition.ConditionId)
 		require.NoError(t, err)
 		require.NotNil(t, finded)
-		require.Equal(t, newCondition, finded)
+		require.Equal(t, savedCondition, finded)
 	})
 
 	t.Run("FindByUserIdAndUUID after UpdateCondition", func(t *testing.T) {
@@ -110,18 +79,20 @@ func TestConditionRepo(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, success)
 
-		success, err = conditionRepo.InsertCondition(ctx, userId, 1, newCondition)
+		savedCondition := newCondition()
+		success, err = conditionRepo.InsertCondition(ctx, userId, 1, savedCondition)
 		require.NoError(t, err)
 		require.True(t, success)
 
+		updatedCondition := newUpdatedCondition(savedCondition.ConditionId)
 		success, err = conditionRepo.UpdateCondition(ctx, userId, updatedCondition)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, conditionId)
+		finded, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, savedCondition.ConditionId)
 		require.NoError(t, err)
 		require.NotNil(t, finded)
-		require.NotEqual(t, newCondition, finded)
+		require.NotEqual(t, savedCondition, finded)
 		require.Equal(t, updatedCondition, finded)
 	})
 
@@ -133,15 +104,16 @@ func TestConditionRepo(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, success)
 
-		success, err = conditionRepo.InsertCondition(ctx, userId, 1, newCondition)
+		savedCondition := newCondition()
+		success, err = conditionRepo.InsertCondition(ctx, userId, 1, savedCondition)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		success, err = conditionRepo.DeleteCondition(ctx, userId, conditionId)
+		success, err = conditionRepo.DeleteCondition(ctx, userId, savedCondition.ConditionId)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, conditionId)
+		finded, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, savedCondition.ConditionId)
 		require.NoError(t, err)
 		require.Nil(t, finded)
 	})
@@ -150,22 +122,22 @@ func TestConditionRepo(t *testing.T) {
 		{
 			ConditionId:   "conditionId1",
 			ConditionName: "test_condition_name",
-			Query:         condition.Query{},
+			Query:         &condition.Query{},
 		},
 		{
 			ConditionId:   "conditionId2",
 			ConditionName: "test_condition_name",
-			Query:         condition.Query{},
+			Query:         &condition.Query{},
 		},
 		{
 			ConditionId:   "conditionId3",
 			ConditionName: "test_condition_name",
-			Query:         condition.Query{},
+			Query:         &condition.Query{},
 		},
 		{
 			ConditionId:   "conditionId4",
 			ConditionName: "test_condition_name",
-			Query:         condition.Query{},
+			Query:         &condition.Query{},
 		},
 	}
 	t.Run("InsertCondition with limitCount", func(t *testing.T) {
@@ -200,7 +172,7 @@ func TestConditionRepo(t *testing.T) {
 		require.False(t, success)
 	})
 
-	t.Run("same conditionId and same userId", func(t *testing.T) {
+	t.Run("set conditionId when insert condition", func(t *testing.T) {
 		conditionRepo := initConditionRepo(t)
 		ctx := context.TODO()
 
@@ -208,53 +180,20 @@ func TestConditionRepo(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, success)
 
-		sameConditionId := "same_condition_id"
-
-		success, err = conditionRepo.InsertCondition(ctx, userId, 2, &condition.Condition{
-			ConditionId:   sameConditionId,
-			ConditionName: "different_condition_name_1",
-			Query:         condition.Query{},
-		})
+		savedCondition := newCondition()
+		success, err = conditionRepo.InsertCondition(ctx, userId, 2, savedCondition)
+		firstConditionId := savedCondition.ConditionId
 		require.NoError(t, err)
 		require.True(t, success)
+		require.NotEmpty(t, firstConditionId)
 
-		success, err = conditionRepo.InsertCondition(ctx, userId, 2, &condition.Condition{
-			ConditionId:   sameConditionId,
-			ConditionName: "different_condition_name_2",
-			Query:         condition.Query{SkillNames: [][]string{{"test_skill_name"}}},
-		})
-		require.NoError(t, err)
-		require.False(t, success)
-	})
-
-	t.Run("same conditionId and different userId", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
-		ctx := context.TODO()
-
-		userId_1 := "userId_1"
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId_1)
+		success, err = conditionRepo.InsertCondition(ctx, userId, 2, savedCondition)
+		secondConditionId := savedCondition.ConditionId
 		require.NoError(t, err)
 		require.True(t, success)
+		require.NotEmpty(t, secondConditionId)
 
-		success, err = conditionRepo.InsertCondition(ctx, userId_1, 2, &condition.Condition{
-			ConditionId:   conditionId,
-			ConditionName: "different_condition_name_1",
-			Query:         condition.Query{},
-		})
-		require.NoError(t, err)
-		require.True(t, success)
-
-		differentUserId := "different_user_id"
-		success, err = conditionRepo.InitDesiredCondition(ctx, differentUserId)
-		require.NoError(t, err)
-		require.True(t, success)
-		success, err = conditionRepo.InsertCondition(ctx, differentUserId, 2, &condition.Condition{
-			ConditionId:   conditionId,
-			ConditionName: "different_condition_name_2",
-			Query:         condition.Query{SkillNames: [][]string{{"test_skill_name"}}},
-		})
-		require.Error(t, err) // Duplicate key error
-		require.False(t, success)
+		require.NotEqual(t, firstConditionId, secondConditionId)
 	})
 
 	t.Run("limitCount can't be zero", func(t *testing.T) {
@@ -265,7 +204,7 @@ func TestConditionRepo(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, success)
 
-		success, err = conditionRepo.InsertCondition(ctx, userId, 0, newCondition)
+		success, err = conditionRepo.InsertCondition(ctx, userId, 0, newCondition())
 		require.Error(t, err)
 		require.Equal(t, repo.ErrNonZero, err)
 		require.False(t, success)
@@ -280,4 +219,39 @@ func initConditionRepo(t *testing.T) repo.ConditionRepo {
 func checkSimilarTimes(t *testing.T, after time.Time, before time.Time) {
 	require.GreaterOrEqual(t, after.UTC(), before.UTC())
 	require.LessOrEqual(t, after.UTC().Add(time.Second*-1), before.UTC())
+}
+
+func newCondition() *condition.Condition {
+	return &condition.Condition{
+		ConditionName: "test_condition_name",
+		Query: &condition.Query{
+			Categories: []*condition.CategoryQuery{
+				{
+					Site:         "test_site",
+					CategoryName: "test_category_name",
+				},
+			},
+			SkillNames: [][]string{{"test_skill_name"}},
+			MinCareer:  ptr.P(int32(1)),
+			MaxCareer:  ptr.P(int32(2)),
+		},
+	}
+}
+
+func newUpdatedCondition(conditionId string) *condition.Condition {
+	return &condition.Condition{
+		ConditionId:   conditionId,
+		ConditionName: "update_condition_name",
+		Query: &condition.Query{
+			Categories: []*condition.CategoryQuery{
+				{
+					Site:         "update_site",
+					CategoryName: "update_category_name",
+				},
+			},
+			SkillNames: [][]string{{"update_skill_name"}},
+			MinCareer:  ptr.P(int32(3)),
+			MaxCareer:  nil,
+		},
+	}
 }

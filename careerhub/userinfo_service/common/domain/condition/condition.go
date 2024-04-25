@@ -18,16 +18,17 @@ const (
 )
 
 type DesiredCondition struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty"`
-	UserId     string             `bson:"userId"`
-	Conditions []Condition        `bson:"conditions"`
-	InsertedAt time.Time          `bson:"insertedAt"`
+	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	UserId      string             `bson:"userId"`
+	Conditions  []*Condition       `bson:"conditions"`
+	AgreeToMail bool               `bson:"agreeToMail"`
+	InsertedAt  time.Time          `bson:"insertedAt"`
 }
 
 type Condition struct {
 	ConditionId   string `bson:"conditionId"`
 	ConditionName string `bson:"conditionName"`
-	Query         Query  `bson:"query"`
+	Query         *Query `bson:"query"`
 }
 
 type Query struct {

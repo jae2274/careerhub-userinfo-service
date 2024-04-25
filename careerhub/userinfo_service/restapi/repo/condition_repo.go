@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/condition"
 	"github.com/jae2274/goutils/terr"
 	"go.mongodb.org/mongo-driver/bson"
@@ -33,7 +34,7 @@ func NewConditionRepo(col *mongo.Collection) ConditionRepo {
 func (r *ConditionRepoImpl) InitDesiredCondition(ctx context.Context, userId string) (bool, error) {
 	condition := condition.DesiredCondition{
 		UserId:     userId,
-		Conditions: []condition.Condition{},
+		Conditions: []*condition.Condition{},
 		InsertedAt: time.Now(),
 	}
 
@@ -83,7 +84,7 @@ func (r *ConditionRepoImpl) FindByUserIdAndUUID(ctx context.Context, userId stri
 
 	for _, c := range condition.Conditions {
 		if c.ConditionId == conditionId {
-			return &c, nil
+			return c, nil
 		}
 	}
 
@@ -97,6 +98,7 @@ func (r *ConditionRepoImpl) InsertCondition(ctx context.Context, userId string, 
 	if limitCount == 0 {
 		return false, ErrNonZero
 	}
+	newCondition.ConditionId = uuid.NewString()
 
 	filter := bson.M{
 		condition.UserIdField: userId, //해당 조건은 InitConditions 함수에서 생성되므로 userId가 존재한다는 것을 보장함

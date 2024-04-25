@@ -18,6 +18,7 @@ message FindConditionsRequest{
 
 message Conditions{
     repeated Condition conditions = 1;
+    bool agreeToMail = 2;
 }
 
 message Condition{
@@ -49,8 +50,13 @@ message FindConditionRequest{
 
 message AddConditionRequest{
     string userId = 1;
-    Condition condition = 2;
+    AddConditionReq condition = 2;
     uint32 limitCount = 3;
+}
+
+message AddConditionReq{
+    string conditionName = 2;
+    Query query = 3;
 }
 
 message IsSuccess{

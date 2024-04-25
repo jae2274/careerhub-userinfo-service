@@ -8,7 +8,7 @@ import (
 )
 
 type ConditionService interface {
-	FindByUserId(ctx context.Context, userId string) ([]condition.Condition, error)
+	FindByUserId(ctx context.Context, userId string) (*condition.DesiredCondition, error)
 	FindByUserIdAndUUID(ctx context.Context, userId string, conditionId string) (*condition.Condition, error)
 	InsertCondition(ctx context.Context, userId string, limitCount uint, newCondition *condition.Condition) (bool, error)
 	UpdateCondition(ctx context.Context, userId string, updateCondition *condition.Condition) (bool, error)
@@ -25,7 +25,7 @@ func NewConditionService(conditionRepo repo.ConditionRepo) ConditionService {
 	}
 }
 
-func (c *ConditionServiceImpl) FindByUserId(ctx context.Context, userId string) ([]condition.Condition, error) {
+func (c *ConditionServiceImpl) FindByUserId(ctx context.Context, userId string) (*condition.DesiredCondition, error) {
 	desiredCondition, err := c.conditionRepo.FindByUserId(ctx, userId)
 	if err != nil {
 		return nil, err
@@ -37,10 +37,13 @@ func (c *ConditionServiceImpl) FindByUserId(ctx context.Context, userId string) 
 			return nil, err
 		}
 
-		return []condition.Condition{}, nil
+		desiredCondition, err = c.conditionRepo.FindByUserId(ctx, userId)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return desiredCondition.Conditions, nil
+	return desiredCondition, nil
 }
 
 func (c *ConditionServiceImpl) FindByUserIdAndUUID(ctx context.Context, userId string, conditionId string) (*condition.Condition, error) {
