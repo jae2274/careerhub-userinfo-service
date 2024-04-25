@@ -5,6 +5,7 @@ import (
 
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/condition"
 	"github.com/jae2274/goutils/terr"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -23,7 +24,7 @@ func NewConditionRepo(db *mongo.Database) ConditionRepo {
 }
 
 func (r *ConditionRepoImpl) GetDesiredConditions(ctx context.Context) ([]*condition.DesiredCondition, error) {
-	cursor, err := r.col.Find(ctx, nil)
+	cursor, err := r.col.Find(ctx, bson.M{condition.AgreeToMailField: true})
 	if err != nil {
 		if mongo.ErrNilDocument == err {
 			return []*condition.DesiredCondition{}, nil

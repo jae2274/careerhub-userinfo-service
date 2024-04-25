@@ -49,15 +49,10 @@ func (*DesiredCondition) Collection() string {
 }
 
 func (*DesiredCondition) IndexModels() map[string]*mongo.IndexModel {
-	useridIndex := fmt.Sprintf("%s_1", UserIdField)                                // userId_1
-	conditionsConditionIdIndex := fmt.Sprintf("%s_1", Conditions_ConditionIdField) // conditions.conditionId_1
+	useridIndex := fmt.Sprintf("%s_1", UserIdField) // userId_1
 	return map[string]*mongo.IndexModel{
 		useridIndex: {
 			Keys:    bson.D{{Key: UserIdField, Value: 1}},
-			Options: options.Index().SetUnique(true),
-		},
-		conditionsConditionIdIndex: {
-			Keys:    bson.D{{Key: Conditions_ConditionIdField, Value: 1}},
 			Options: options.Index().SetUnique(true),
 		},
 	}

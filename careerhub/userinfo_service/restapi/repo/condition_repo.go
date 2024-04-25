@@ -77,8 +77,7 @@ func (r *ConditionRepoImpl) InsertCondition(ctx context.Context, userId string, 
 
 	filter := bson.M{
 		condition.UserIdField: userId, //해당 조건은 InitConditions 함수에서 생성되므로 userId가 존재한다는 것을 보장함
-		fmt.Sprintf("%s.%d", condition.ConditionsField, limitCount-1): bson.M{"$exists": false},                //갯수 제한
-		condition.Conditions_ConditionIdField:                         bson.M{"$ne": newCondition.ConditionId}, //중복 방지
+		fmt.Sprintf("%s.%d", condition.ConditionsField, limitCount-1): bson.M{"$exists": false}, //갯수 제한
 	}
 	update := bson.M{"$push": bson.M{condition.ConditionsField: newCondition}}
 
