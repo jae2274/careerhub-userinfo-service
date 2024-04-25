@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/condition"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/repo"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/restapi_grpc"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/server"
@@ -17,8 +16,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-func Run(ctx context.Context, grpcPort int, collections map[string]*mongo.Collection) error {
-	conditionRepo := repo.NewConditionRepo(collections[(&condition.DesiredCondition{}).Collection()])
+func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
+	conditionRepo := repo.NewConditionRepo(db)
 	conditionService := service.NewConditionService(conditionRepo)
 	restApiService := server.NewRestApiGrpcServer(conditionService)
 

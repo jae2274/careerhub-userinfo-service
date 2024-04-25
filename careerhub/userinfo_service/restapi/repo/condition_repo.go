@@ -24,9 +24,9 @@ type ConditionRepoImpl struct {
 	col *mongo.Collection
 }
 
-func NewConditionRepo(col *mongo.Collection) ConditionRepo {
+func NewConditionRepo(db *mongo.Database) ConditionRepo {
 	return &ConditionRepoImpl{
-		col: col,
+		col: db.Collection((&condition.DesiredCondition{}).Collection()),
 	}
 }
 

@@ -187,8 +187,7 @@ func TestAgreeToMail(t *testing.T) {
 }
 
 func initService(t *testing.T) service.ConditionService {
-	db := tinit.InitDB(t)
-	conditionRepo := repo.NewConditionRepo(db.Collection((&condition.DesiredCondition{}).Collection()))
+	conditionRepo := repo.NewConditionRepo(tinit.InitDB(t))
 
 	return service.NewConditionService(conditionRepo)
 }

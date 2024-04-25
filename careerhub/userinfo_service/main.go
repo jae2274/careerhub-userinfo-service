@@ -48,13 +48,13 @@ func main() {
 	db, err := mongocfg.NewDatabase(envVars.MongoUri, envVars.DbName, envVars.DBUser)
 	checkErr(ctx, err)
 
-	collections, err := initCollections(db)
+	_, err = initCollections(db)
 	checkErr(ctx, err)
 
 	runErr := make(chan error)
 
 	go func() {
-		err := restapi.Run(ctx, envVars.RestApiGrpcPort, collections)
+		err := restapi.Run(ctx, envVars.RestApiGrpcPort, db)
 		runErr <- err
 	}()
 

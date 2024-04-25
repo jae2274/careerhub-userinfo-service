@@ -215,8 +215,7 @@ func TestConditionRepo(t *testing.T) {
 }
 
 func initConditionRepo(t *testing.T) repo.ConditionRepo {
-	db := tinit.InitDB(t)
-	return tinit.InitRestapiConditionRepo(t, db)
+	return repo.NewConditionRepo(tinit.InitDB(t))
 }
 
 func checkSimilarTimes(t *testing.T, after time.Time, before time.Time) {
