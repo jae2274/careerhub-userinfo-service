@@ -9,10 +9,10 @@ import (
 
 type ConditionService interface {
 	FindByUserId(ctx context.Context, userId string) (*condition.DesiredCondition, error)
-	FindByUserIdAndUUID(ctx context.Context, userId string, conditionId string) (*condition.Condition, error)
 	InsertCondition(ctx context.Context, userId string, limitCount uint, newCondition *condition.Condition) (bool, error)
 	UpdateCondition(ctx context.Context, userId string, updateCondition *condition.Condition) (bool, error)
 	DeleteCondition(ctx context.Context, userId string, conditionId string) (bool, error)
+	UpdateAgreeToMail(ctx context.Context, userId string, agreeToMail bool) (bool, error)
 }
 
 type ConditionServiceImpl struct {
@@ -46,10 +46,6 @@ func (c *ConditionServiceImpl) FindByUserId(ctx context.Context, userId string) 
 	return desiredCondition, nil
 }
 
-func (c *ConditionServiceImpl) FindByUserIdAndUUID(ctx context.Context, userId string, conditionId string) (*condition.Condition, error) {
-	return c.conditionRepo.FindByUserIdAndUUID(ctx, userId, conditionId)
-}
-
 func (c *ConditionServiceImpl) InsertCondition(ctx context.Context, userId string, limitCount uint, newCondition *condition.Condition) (bool, error) {
 	_, err := c.conditionRepo.InitDesiredCondition(ctx, userId)
 	if err != nil {
@@ -60,9 +56,28 @@ func (c *ConditionServiceImpl) InsertCondition(ctx context.Context, userId strin
 }
 
 func (c *ConditionServiceImpl) UpdateCondition(ctx context.Context, userId string, updateCondition *condition.Condition) (bool, error) {
+	_, err := c.conditionRepo.InitDesiredCondition(ctx, userId)
+	if err != nil {
+		return false, err
+	}
+
 	return c.conditionRepo.UpdateCondition(ctx, userId, updateCondition)
 }
 
 func (c *ConditionServiceImpl) DeleteCondition(ctx context.Context, userId string, conditionId string) (bool, error) {
+	_, err := c.conditionRepo.InitDesiredCondition(ctx, userId)
+	if err != nil {
+		return false, err
+	}
+
 	return c.conditionRepo.DeleteCondition(ctx, userId, conditionId)
+}
+
+func (c *ConditionServiceImpl) UpdateAgreeToMail(ctx context.Context, userId string, agreeToMail bool) (bool, error) {
+	_, err := c.conditionRepo.InitDesiredCondition(ctx, userId)
+	if err != nil {
+		return false, err
+	}
+
+	return c.conditionRepo.UpdateAgreeToMail(ctx, userId, agreeToMail)
 }

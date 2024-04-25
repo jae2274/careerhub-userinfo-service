@@ -23,10 +23,10 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RestApiGrpcClient interface {
 	FindConditions(ctx context.Context, in *FindConditionsRequest, opts ...grpc.CallOption) (*Conditions, error)
-	FindCondition(ctx context.Context, in *FindConditionRequest, opts ...grpc.CallOption) (*Condition, error)
 	AddCondition(ctx context.Context, in *AddConditionRequest, opts ...grpc.CallOption) (*IsSuccess, error)
 	UpdateCondition(ctx context.Context, in *UpdateConditionRequest, opts ...grpc.CallOption) (*IsSuccess, error)
 	DeleteCondition(ctx context.Context, in *DeleteConditionRequest, opts ...grpc.CallOption) (*IsSuccess, error)
+	UpdateAgreeToMail(ctx context.Context, in *UpdateAgreeToMailRequest, opts ...grpc.CallOption) (*IsSuccess, error)
 }
 
 type restApiGrpcClient struct {
@@ -40,15 +40,6 @@ func NewRestApiGrpcClient(cc grpc.ClientConnInterface) RestApiGrpcClient {
 func (c *restApiGrpcClient) FindConditions(ctx context.Context, in *FindConditionsRequest, opts ...grpc.CallOption) (*Conditions, error) {
 	out := new(Conditions)
 	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/FindConditions", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *restApiGrpcClient) FindCondition(ctx context.Context, in *FindConditionRequest, opts ...grpc.CallOption) (*Condition, error) {
-	out := new(Condition)
-	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/FindCondition", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,15 +73,24 @@ func (c *restApiGrpcClient) DeleteCondition(ctx context.Context, in *DeleteCondi
 	return out, nil
 }
 
+func (c *restApiGrpcClient) UpdateAgreeToMail(ctx context.Context, in *UpdateAgreeToMailRequest, opts ...grpc.CallOption) (*IsSuccess, error) {
+	out := new(IsSuccess)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/UpdateAgreeToMail", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RestApiGrpcServer is the server API for RestApiGrpc service.
 // All implementations must embed UnimplementedRestApiGrpcServer
 // for forward compatibility
 type RestApiGrpcServer interface {
 	FindConditions(context.Context, *FindConditionsRequest) (*Conditions, error)
-	FindCondition(context.Context, *FindConditionRequest) (*Condition, error)
 	AddCondition(context.Context, *AddConditionRequest) (*IsSuccess, error)
 	UpdateCondition(context.Context, *UpdateConditionRequest) (*IsSuccess, error)
 	DeleteCondition(context.Context, *DeleteConditionRequest) (*IsSuccess, error)
+	UpdateAgreeToMail(context.Context, *UpdateAgreeToMailRequest) (*IsSuccess, error)
 	mustEmbedUnimplementedRestApiGrpcServer()
 }
 
@@ -101,9 +101,6 @@ type UnimplementedRestApiGrpcServer struct {
 func (UnimplementedRestApiGrpcServer) FindConditions(context.Context, *FindConditionsRequest) (*Conditions, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindConditions not implemented")
 }
-func (UnimplementedRestApiGrpcServer) FindCondition(context.Context, *FindConditionRequest) (*Condition, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindCondition not implemented")
-}
 func (UnimplementedRestApiGrpcServer) AddCondition(context.Context, *AddConditionRequest) (*IsSuccess, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddCondition not implemented")
 }
@@ -112,6 +109,9 @@ func (UnimplementedRestApiGrpcServer) UpdateCondition(context.Context, *UpdateCo
 }
 func (UnimplementedRestApiGrpcServer) DeleteCondition(context.Context, *DeleteConditionRequest) (*IsSuccess, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCondition not implemented")
+}
+func (UnimplementedRestApiGrpcServer) UpdateAgreeToMail(context.Context, *UpdateAgreeToMailRequest) (*IsSuccess, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAgreeToMail not implemented")
 }
 func (UnimplementedRestApiGrpcServer) mustEmbedUnimplementedRestApiGrpcServer() {}
 
@@ -140,24 +140,6 @@ func _RestApiGrpc_FindConditions_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RestApiGrpcServer).FindConditions(ctx, req.(*FindConditionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RestApiGrpc_FindCondition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FindConditionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RestApiGrpcServer).FindCondition(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/FindCondition",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RestApiGrpcServer).FindCondition(ctx, req.(*FindConditionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -216,6 +198,24 @@ func _RestApiGrpc_DeleteCondition_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RestApiGrpc_UpdateAgreeToMail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAgreeToMailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RestApiGrpcServer).UpdateAgreeToMail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/UpdateAgreeToMail",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RestApiGrpcServer).UpdateAgreeToMail(ctx, req.(*UpdateAgreeToMailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RestApiGrpc_ServiceDesc is the grpc.ServiceDesc for RestApiGrpc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,10 +228,6 @@ var RestApiGrpc_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _RestApiGrpc_FindConditions_Handler,
 		},
 		{
-			MethodName: "FindCondition",
-			Handler:    _RestApiGrpc_FindCondition_Handler,
-		},
-		{
 			MethodName: "AddCondition",
 			Handler:    _RestApiGrpc_AddCondition_Handler,
 		},
@@ -242,6 +238,10 @@ var RestApiGrpc_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCondition",
 			Handler:    _RestApiGrpc_DeleteCondition_Handler,
+		},
+		{
+			MethodName: "UpdateAgreeToMail",
+			Handler:    _RestApiGrpc_UpdateAgreeToMail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

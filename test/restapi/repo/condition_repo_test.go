@@ -42,17 +42,20 @@ func TestConditionRepo(t *testing.T) {
 		checkSimilarTimes(t, now, desiredCondition.InsertedAt)
 	})
 
-	nonExistedConditionId := "non_existed_condition_id"
-	t.Run("FindByUserIdAndUUID without InsertCondition", func(t *testing.T) {
+	t.Run("FindByUserId without InsertCondition", func(t *testing.T) {
 		conditionRepo := initConditionRepo(t)
 		ctx := context.TODO()
 
-		condition, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, nonExistedConditionId)
+		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
 		require.NoError(t, err)
-		require.Nil(t, condition)
+		require.True(t, success)
+
+		finded, err := conditionRepo.FindByUserId(ctx, userId)
+		require.NoError(t, err)
+		require.Len(t, finded.Conditions, 0)
 	})
 
-	t.Run("FindByUserIdAndUUID after InsertCondition", func(t *testing.T) {
+	t.Run("FindByUserId after InsertCondition", func(t *testing.T) {
 		conditionRepo := initConditionRepo(t)
 		ctx := context.TODO()
 
@@ -65,13 +68,13 @@ func TestConditionRepo(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, savedCondition.ConditionId)
+		finded, err := conditionRepo.FindByUserId(ctx, userId)
 		require.NoError(t, err)
-		require.NotNil(t, finded)
-		require.Equal(t, savedCondition, finded)
+		require.Len(t, finded.Conditions, 1)
+		require.Equal(t, savedCondition, finded.Conditions[0])
 	})
 
-	t.Run("FindByUserIdAndUUID after UpdateCondition", func(t *testing.T) {
+	t.Run("FindByUserId after UpdateCondition", func(t *testing.T) {
 		conditionRepo := initConditionRepo(t)
 		ctx := context.TODO()
 
@@ -89,14 +92,14 @@ func TestConditionRepo(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, savedCondition.ConditionId)
+		finded, err := conditionRepo.FindByUserId(ctx, userId)
 		require.NoError(t, err)
-		require.NotNil(t, finded)
-		require.NotEqual(t, savedCondition, finded)
-		require.Equal(t, updatedCondition, finded)
+		require.Len(t, finded.Conditions, 1)
+		require.NotEqual(t, savedCondition, finded.Conditions[0])
+		require.Equal(t, updatedCondition, finded.Conditions[0])
 	})
 
-	t.Run("FindByUserIdAndUUID after DeleteCondition", func(t *testing.T) {
+	t.Run("FindByUserId after DeleteCondition", func(t *testing.T) {
 		conditionRepo := initConditionRepo(t)
 		ctx := context.TODO()
 
@@ -113,9 +116,9 @@ func TestConditionRepo(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserIdAndUUID(ctx, userId, savedCondition.ConditionId)
+		finded, err := conditionRepo.FindByUserId(ctx, userId)
 		require.NoError(t, err)
-		require.Nil(t, finded)
+		require.Len(t, finded.Conditions, 0)
 	})
 
 	limitConditions := []*condition.Condition{

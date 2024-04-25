@@ -15,6 +15,7 @@ const (
 	Conditions_ConditionIdField = "conditions.conditionId"
 	ConditionIdField            = "conditionId"
 	ConditionsField             = "conditions"
+	AgreeToMailField            = "agreeToMail"
 )
 
 type DesiredCondition struct {

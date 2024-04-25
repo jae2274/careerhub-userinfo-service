@@ -35,14 +35,7 @@ func (r *RestApiGrpcServer) FindConditions(ctx context.Context, req *restapi_grp
 		AgreeToMail: desiredCondition.AgreeToMail,
 	}, nil
 }
-func (r *RestApiGrpcServer) FindCondition(ctx context.Context, req *restapi_grpc.FindConditionRequest) (*restapi_grpc.Condition, error) {
-	condition, err := r.conditionService.FindByUserIdAndUUID(ctx, req.UserId, req.ConditionId)
-	if err != nil {
-		return nil, err
-	}
 
-	return convertConditionToGrpc(condition), nil
-}
 func (r *RestApiGrpcServer) AddCondition(ctx context.Context, req *restapi_grpc.AddConditionRequest) (*restapi_grpc.IsSuccess, error) {
 	newCondition := convertConditionToDomain("", req.Condition.ConditionName, req.Condition.Query)
 	success, err := r.conditionService.InsertCondition(ctx, req.UserId, uint(req.LimitCount), newCondition)
@@ -61,6 +54,14 @@ func (r *RestApiGrpcServer) UpdateCondition(ctx context.Context, req *restapi_gr
 }
 func (r *RestApiGrpcServer) DeleteCondition(ctx context.Context, req *restapi_grpc.DeleteConditionRequest) (*restapi_grpc.IsSuccess, error) {
 	success, err := r.conditionService.DeleteCondition(ctx, req.UserId, req.ConditionId)
+
+	return &restapi_grpc.IsSuccess{
+		Value: success,
+	}, err
+}
+
+func (r *RestApiGrpcServer) UpdateAgreeToMail(ctx context.Context, req *restapi_grpc.UpdateAgreeToMailRequest) (*restapi_grpc.IsSuccess, error) {
+	success, err := r.conditionService.UpdateAgreeToMail(ctx, req.UserId, req.AgreeToMail)
 
 	return &restapi_grpc.IsSuccess{
 		Value: success,

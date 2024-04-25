@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestConditionService(t *testing.T) {
+func TestConditions(t *testing.T) {
 	t.Run("return empty", func(t *testing.T) {
 		ctx := context.Background()
 		svc := initService(t)
@@ -148,6 +148,41 @@ func TestConditionService(t *testing.T) {
 		isSuccess, err := svc.UpdateCondition(ctx, "userId", newUpdatedCondition(uuid.NewString()))
 		require.NoError(t, err)
 		require.False(t, isSuccess)
+	})
+
+	t.Run("return false when delete condition with non-exist conditionId", func(t *testing.T) {
+		ctx := context.Background()
+		svc := initService(t)
+
+		isSuccess, err := svc.DeleteCondition(ctx, "userId", uuid.NewString())
+		require.NoError(t, err)
+		require.False(t, isSuccess)
+	})
+}
+
+func TestAgreeToMail(t *testing.T) {
+
+	testUpdateAgreeToMail := func(t *testing.T, agreeToMail bool) {
+		ctx := context.Background()
+		svc := initService(t)
+
+		userId := "userId"
+		isSuccess, err := svc.UpdateAgreeToMail(ctx, userId, agreeToMail)
+		require.NoError(t, err)
+		require.True(t, isSuccess)
+
+		desiredCondition, err := svc.FindByUserId(ctx, userId)
+		require.NoError(t, err)
+
+		require.Equal(t, userId, desiredCondition.UserId)
+		require.Equal(t, agreeToMail, desiredCondition.AgreeToMail)
+	}
+	t.Run("after update agreeToMail to false", func(t *testing.T) {
+		testUpdateAgreeToMail(t, false)
+	})
+
+	t.Run("after update agreeToMail to true", func(t *testing.T) {
+		testUpdateAgreeToMail(t, true)
 	})
 }
 
