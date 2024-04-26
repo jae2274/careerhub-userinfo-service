@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RestApiGrpcClient interface {
-	FindConditions(ctx context.Context, in *FindConditionsRequest, opts ...grpc.CallOption) (*Conditions, error)
+	FindMatchJob(ctx context.Context, in *FindMatchJobRequest, opts ...grpc.CallOption) (*FindMatchJobResponse, error)
 	AddCondition(ctx context.Context, in *AddConditionRequest, opts ...grpc.CallOption) (*IsSuccess, error)
 	UpdateCondition(ctx context.Context, in *UpdateConditionRequest, opts ...grpc.CallOption) (*IsSuccess, error)
 	DeleteCondition(ctx context.Context, in *DeleteConditionRequest, opts ...grpc.CallOption) (*IsSuccess, error)
@@ -37,9 +37,9 @@ func NewRestApiGrpcClient(cc grpc.ClientConnInterface) RestApiGrpcClient {
 	return &restApiGrpcClient{cc}
 }
 
-func (c *restApiGrpcClient) FindConditions(ctx context.Context, in *FindConditionsRequest, opts ...grpc.CallOption) (*Conditions, error) {
-	out := new(Conditions)
-	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/FindConditions", in, out, opts...)
+func (c *restApiGrpcClient) FindMatchJob(ctx context.Context, in *FindMatchJobRequest, opts ...grpc.CallOption) (*FindMatchJobResponse, error) {
+	out := new(FindMatchJobResponse)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/FindMatchJob", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (c *restApiGrpcClient) UpdateAgreeToMail(ctx context.Context, in *UpdateAgr
 // All implementations must embed UnimplementedRestApiGrpcServer
 // for forward compatibility
 type RestApiGrpcServer interface {
-	FindConditions(context.Context, *FindConditionsRequest) (*Conditions, error)
+	FindMatchJob(context.Context, *FindMatchJobRequest) (*FindMatchJobResponse, error)
 	AddCondition(context.Context, *AddConditionRequest) (*IsSuccess, error)
 	UpdateCondition(context.Context, *UpdateConditionRequest) (*IsSuccess, error)
 	DeleteCondition(context.Context, *DeleteConditionRequest) (*IsSuccess, error)
@@ -98,8 +98,8 @@ type RestApiGrpcServer interface {
 type UnimplementedRestApiGrpcServer struct {
 }
 
-func (UnimplementedRestApiGrpcServer) FindConditions(context.Context, *FindConditionsRequest) (*Conditions, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindConditions not implemented")
+func (UnimplementedRestApiGrpcServer) FindMatchJob(context.Context, *FindMatchJobRequest) (*FindMatchJobResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindMatchJob not implemented")
 }
 func (UnimplementedRestApiGrpcServer) AddCondition(context.Context, *AddConditionRequest) (*IsSuccess, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddCondition not implemented")
@@ -126,20 +126,20 @@ func RegisterRestApiGrpcServer(s grpc.ServiceRegistrar, srv RestApiGrpcServer) {
 	s.RegisterService(&RestApiGrpc_ServiceDesc, srv)
 }
 
-func _RestApiGrpc_FindConditions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FindConditionsRequest)
+func _RestApiGrpc_FindMatchJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindMatchJobRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RestApiGrpcServer).FindConditions(ctx, in)
+		return srv.(RestApiGrpcServer).FindMatchJob(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/FindConditions",
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/FindMatchJob",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RestApiGrpcServer).FindConditions(ctx, req.(*FindConditionsRequest))
+		return srv.(RestApiGrpcServer).FindMatchJob(ctx, req.(*FindMatchJobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -224,8 +224,8 @@ var RestApiGrpc_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RestApiGrpcServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "FindConditions",
-			Handler:    _RestApiGrpc_FindConditions_Handler,
+			MethodName: "FindMatchJob",
+			Handler:    _RestApiGrpc_FindMatchJob_Handler,
 		},
 		{
 			MethodName: "AddCondition",

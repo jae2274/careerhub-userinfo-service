@@ -3,38 +3,38 @@ package server
 import (
 	"context"
 
-	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/condition"
+	condition "github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/matchjob"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/repo"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/suggester/suggester_grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type SuggesterGrpcServer struct {
-	conditionRepo repo.ConditionRepo
+	matchJobRepo repo.MatchJobRepo
 	suggester_grpc.UnimplementedUserinfoServer
 }
 
-func NewSuggesterGrpcServer(conditionRepo repo.ConditionRepo) *SuggesterGrpcServer {
+func NewSuggesterGrpcServer(matchJobRepo repo.MatchJobRepo) *SuggesterGrpcServer {
 	return &SuggesterGrpcServer{
-		conditionRepo: conditionRepo,
+		matchJobRepo: matchJobRepo,
 	}
 }
 func (s *SuggesterGrpcServer) GetConditions(ctx context.Context, _ *emptypb.Empty) (*suggester_grpc.GetConditionsResponse, error) {
-	desiredConditions, err := s.conditionRepo.GetDesiredConditions(ctx)
+	matchJobs, err := s.matchJobRepo.GetMatchJobs(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return &suggester_grpc.GetConditionsResponse{
-		Conditions: convertDesiredConditionsToGrpc(desiredConditions),
+		Conditions: convertMatchJobsToGrpc(matchJobs),
 	}, nil
 }
 
-func convertDesiredConditionsToGrpc(desiredConditions []*condition.DesiredCondition) []*suggester_grpc.Condition {
+func convertMatchJobsToGrpc(matchJobs []*condition.MatchJob) []*suggester_grpc.Condition {
 	var grpcConditions []*suggester_grpc.Condition
 
-	for _, desiredCondition := range desiredConditions {
-		for _, c := range desiredCondition.Conditions {
+	for _, matchJob := range matchJobs {
+		for _, c := range matchJob.Conditions {
 			categories := make([]*suggester_grpc.Category, len(c.Query.Categories))
 			for i, category := range c.Query.Categories {
 				categories[i] = &suggester_grpc.Category{
@@ -51,7 +51,7 @@ func convertDesiredConditionsToGrpc(desiredConditions []*condition.DesiredCondit
 			}
 
 			grpcConditions = append(grpcConditions, &suggester_grpc.Condition{
-				UserId:        desiredCondition.UserId,
+				UserId:        matchJob.UserId,
 				ConditionId:   c.ConditionId,
 				ConditionName: c.ConditionName,
 				Query: &suggester_grpc.Query{

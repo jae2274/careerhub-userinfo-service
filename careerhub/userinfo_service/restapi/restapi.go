@@ -17,8 +17,8 @@ import (
 )
 
 func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
-	conditionRepo := repo.NewConditionRepo(db)
-	conditionService := service.NewConditionService(conditionRepo)
+	matchJobRepo := repo.NewMatchJobRepo(db)
+	conditionService := service.NewMatchJobService(matchJobRepo)
 	restApiService := server.NewRestApiGrpcServer(conditionService)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))

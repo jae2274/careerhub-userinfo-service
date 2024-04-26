@@ -3,36 +3,36 @@ package server
 import (
 	"context"
 
-	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/condition"
+	condition "github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/matchjob"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/restapi_grpc"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/service"
 )
 
 type RestApiGrpcServer struct {
-	conditionService service.ConditionService
+	conditionService service.MatchJobService
 	restapi_grpc.UnimplementedRestApiGrpcServer
 }
 
-func NewRestApiGrpcServer(conditionService service.ConditionService) restapi_grpc.RestApiGrpcServer {
+func NewRestApiGrpcServer(conditionService service.MatchJobService) restapi_grpc.RestApiGrpcServer {
 	return &RestApiGrpcServer{
 		conditionService: conditionService,
 	}
 }
 
-func (r *RestApiGrpcServer) FindConditions(ctx context.Context, req *restapi_grpc.FindConditionsRequest) (*restapi_grpc.Conditions, error) {
-	desiredCondition, err := r.conditionService.FindByUserId(ctx, req.UserId)
+func (r *RestApiGrpcServer) FindMatchJob(ctx context.Context, req *restapi_grpc.FindMatchJobRequest) (*restapi_grpc.FindMatchJobResponse, error) {
+	matchJob, err := r.conditionService.FindByUserId(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
 
-	response := make([]*restapi_grpc.Condition, len(desiredCondition.Conditions))
-	for i, condition := range desiredCondition.Conditions {
+	response := make([]*restapi_grpc.Condition, len(matchJob.Conditions))
+	for i, condition := range matchJob.Conditions {
 		response[i] = convertConditionToGrpc(condition)
 	}
 
-	return &restapi_grpc.Conditions{
+	return &restapi_grpc.FindMatchJobResponse{
 		Conditions:  response,
-		AgreeToMail: desiredCondition.AgreeToMail,
+		AgreeToMail: matchJob.AgreeToMail,
 	}, nil
 }
 

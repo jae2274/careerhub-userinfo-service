@@ -16,8 +16,8 @@ import (
 )
 
 func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
-	conditionRepo := repo.NewConditionRepo(db)
-	suggesterGrpcserver := server.NewSuggesterGrpcServer(conditionRepo)
+	matchJobRepo := repo.NewMatchJobRepo(db)
+	suggesterGrpcserver := server.NewSuggesterGrpcServer(matchJobRepo)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {

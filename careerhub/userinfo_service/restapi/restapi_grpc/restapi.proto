@@ -5,18 +5,18 @@ option go_package = "careerhub/userinfo_service/restapi_grpc";
 
 
 service RestApiGrpc{
-    rpc FindConditions(FindConditionsRequest)   returns (Conditions);
+    rpc FindMatchJob(FindMatchJobRequest)   returns (FindMatchJobResponse);
     rpc AddCondition(AddConditionRequest)   returns (IsSuccess);
     rpc UpdateCondition(UpdateConditionRequest)   returns (IsSuccess);
     rpc DeleteCondition(DeleteConditionRequest)   returns (IsSuccess);
     rpc UpdateAgreeToMail(UpdateAgreeToMailRequest)   returns (IsSuccess);
 }
 
-message FindConditionsRequest{
+message FindMatchJobRequest{
     string userId = 1;
 }
 
-message Conditions{
+message FindMatchJobResponse{
     repeated Condition conditions = 1;
     bool agreeToMail = 2;
 }

@@ -5,94 +5,94 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/condition"
+	condition "github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/matchjob"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/repo"
 	"github.com/jae2274/careerhub-userinfo-service/test/tinit"
 	"github.com/jae2274/goutils/ptr"
 	"github.com/stretchr/testify/require"
 )
 
-func TestConditionRepo(t *testing.T) {
+func TestMatchJobRepo(t *testing.T) {
 	userId := "test_user_id"
 
 	t.Run("FindByUserId without InitConditions", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		desiredCondition, err := conditionRepo.FindByUserId(ctx, userId)
+		matchJob, err := matchJobRepo.FindByUserId(ctx, userId)
 		require.NoError(t, err)
-		require.Nil(t, desiredCondition)
+		require.Nil(t, matchJob)
 	})
 
 	t.Run("FindByUserId after InitConditions", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err := matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		desiredCondition, err := conditionRepo.FindByUserId(ctx, userId)
+		matchJob, err := matchJobRepo.FindByUserId(ctx, userId)
 		require.NoError(t, err)
-		require.NotNil(t, desiredCondition)
-		require.Equal(t, userId, desiredCondition.UserId)
-		require.Len(t, desiredCondition.Conditions, 0)
+		require.NotNil(t, matchJob)
+		require.Equal(t, userId, matchJob.UserId)
+		require.Len(t, matchJob.Conditions, 0)
 
 		now := time.Now()
-		checkSimilarTimes(t, now, desiredCondition.InsertedAt)
+		checkSimilarTimes(t, now, matchJob.InsertedAt)
 	})
 
 	t.Run("FindByUserId without InsertCondition", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err := matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserId(ctx, userId)
+		finded, err := matchJobRepo.FindByUserId(ctx, userId)
 		require.NoError(t, err)
 		require.Len(t, finded.Conditions, 0)
 	})
 
 	t.Run("FindByUserId after InsertCondition", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err := matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.True(t, success)
 
 		savedCondition := newCondition()
-		success, err = conditionRepo.InsertCondition(ctx, userId, 1, savedCondition)
+		success, err = matchJobRepo.InsertCondition(ctx, userId, 1, savedCondition)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserId(ctx, userId)
+		finded, err := matchJobRepo.FindByUserId(ctx, userId)
 		require.NoError(t, err)
 		require.Len(t, finded.Conditions, 1)
 		require.Equal(t, savedCondition, finded.Conditions[0])
 	})
 
 	t.Run("FindByUserId after UpdateCondition", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err := matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.True(t, success)
 
 		savedCondition := newCondition()
-		success, err = conditionRepo.InsertCondition(ctx, userId, 1, savedCondition)
+		success, err = matchJobRepo.InsertCondition(ctx, userId, 1, savedCondition)
 		require.NoError(t, err)
 		require.True(t, success)
 
 		updatedCondition := newUpdatedCondition(savedCondition.ConditionId)
-		success, err = conditionRepo.UpdateCondition(ctx, userId, updatedCondition)
+		success, err = matchJobRepo.UpdateCondition(ctx, userId, updatedCondition)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserId(ctx, userId)
+		finded, err := matchJobRepo.FindByUserId(ctx, userId)
 		require.NoError(t, err)
 		require.Len(t, finded.Conditions, 1)
 		require.NotEqual(t, savedCondition, finded.Conditions[0])
@@ -100,23 +100,23 @@ func TestConditionRepo(t *testing.T) {
 	})
 
 	t.Run("FindByUserId after DeleteCondition", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err := matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.True(t, success)
 
 		savedCondition := newCondition()
-		success, err = conditionRepo.InsertCondition(ctx, userId, 1, savedCondition)
+		success, err = matchJobRepo.InsertCondition(ctx, userId, 1, savedCondition)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		success, err = conditionRepo.DeleteCondition(ctx, userId, savedCondition.ConditionId)
+		success, err = matchJobRepo.DeleteCondition(ctx, userId, savedCondition.ConditionId)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		finded, err := conditionRepo.FindByUserId(ctx, userId)
+		finded, err := matchJobRepo.FindByUserId(ctx, userId)
 		require.NoError(t, err)
 		require.Len(t, finded.Conditions, 0)
 	})
@@ -144,53 +144,53 @@ func TestConditionRepo(t *testing.T) {
 		},
 	}
 	t.Run("InsertCondition with limitCount", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err := matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.True(t, success)
 
 		limitCount := uint(len(limitConditions) - 1)
 		for _, c := range limitConditions[0:limitCount] {
-			success, err := conditionRepo.InsertCondition(ctx, userId, limitCount, c)
+			success, err := matchJobRepo.InsertCondition(ctx, userId, limitCount, c)
 			require.NoError(t, err)
 			require.True(t, success)
 		}
 
-		success, err = conditionRepo.InsertCondition(ctx, userId, limitCount, limitConditions[limitCount])
+		success, err = matchJobRepo.InsertCondition(ctx, userId, limitCount, limitConditions[limitCount])
 		require.NoError(t, err)
 		require.False(t, success)
 	})
 
 	t.Run("unique userId", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err := matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.True(t, success)
-		success, err = conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err = matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.False(t, success)
 	})
 
 	t.Run("set conditionId when insert condition", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err := matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.True(t, success)
 
 		savedCondition := newCondition()
-		success, err = conditionRepo.InsertCondition(ctx, userId, 2, savedCondition)
+		success, err = matchJobRepo.InsertCondition(ctx, userId, 2, savedCondition)
 		firstConditionId := savedCondition.ConditionId
 		require.NoError(t, err)
 		require.True(t, success)
 		require.NotEmpty(t, firstConditionId)
 
-		success, err = conditionRepo.InsertCondition(ctx, userId, 2, savedCondition)
+		success, err = matchJobRepo.InsertCondition(ctx, userId, 2, savedCondition)
 		secondConditionId := savedCondition.ConditionId
 		require.NoError(t, err)
 		require.True(t, success)
@@ -200,22 +200,22 @@ func TestConditionRepo(t *testing.T) {
 	})
 
 	t.Run("limitCount can't be zero", func(t *testing.T) {
-		conditionRepo := initConditionRepo(t)
+		matchJobRepo := initMatchJobRepo(t)
 		ctx := context.TODO()
 
-		success, err := conditionRepo.InitDesiredCondition(ctx, userId)
+		success, err := matchJobRepo.InitMatchJob(ctx, userId)
 		require.NoError(t, err)
 		require.True(t, success)
 
-		success, err = conditionRepo.InsertCondition(ctx, userId, 0, newCondition())
+		success, err = matchJobRepo.InsertCondition(ctx, userId, 0, newCondition())
 		require.Error(t, err)
 		require.Equal(t, repo.ErrNonZero, err)
 		require.False(t, success)
 	})
 }
 
-func initConditionRepo(t *testing.T) repo.ConditionRepo {
-	return repo.NewConditionRepo(tinit.InitDB(t))
+func initMatchJobRepo(t *testing.T) repo.MatchJobRepo {
+	return repo.NewMatchJobRepo(tinit.InitDB(t))
 }
 
 func checkSimilarTimes(t *testing.T, after time.Time, before time.Time) {

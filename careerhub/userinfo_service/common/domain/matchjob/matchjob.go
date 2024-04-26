@@ -1,4 +1,4 @@
-package condition
+package matchjob
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ const (
 	AgreeToMailField            = "agreeToMail"
 )
 
-type DesiredCondition struct {
+type MatchJob struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty"`
 	UserId      string             `bson:"userId"`
 	Conditions  []*Condition       `bson:"conditions"`
@@ -44,11 +44,11 @@ type CategoryQuery struct {
 	CategoryName string `bson:"categoryName"`
 }
 
-func (*DesiredCondition) Collection() string {
-	return "desiredCondition"
+func (*MatchJob) Collection() string {
+	return "matchJob"
 }
 
-func (*DesiredCondition) IndexModels() map[string]*mongo.IndexModel {
+func (*MatchJob) IndexModels() map[string]*mongo.IndexModel {
 	useridIndex := fmt.Sprintf("%s_1", UserIdField) // userId_1
 	return map[string]*mongo.IndexModel{
 		useridIndex: {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/condition"
+	condition "github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/matchjob"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/mongocfg"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/vars"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi"
@@ -63,7 +63,7 @@ func main() {
 }
 
 func initCollections(db *mongo.Database) (map[string]*mongo.Collection, error) {
-	collections, err := mongocfg.InitCollections(db, &condition.DesiredCondition{})
+	collections, err := mongocfg.InitCollections(db, &condition.MatchJob{})
 	if err != nil {
 		return nil, err
 	}

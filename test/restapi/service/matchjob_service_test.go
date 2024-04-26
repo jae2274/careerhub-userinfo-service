@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/condition"
+	condition "github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/matchjob"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/repo"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/service"
 	"github.com/jae2274/careerhub-userinfo-service/test/tinit"
@@ -18,12 +18,12 @@ func TestConditions(t *testing.T) {
 		ctx := context.Background()
 		svc := initService(t)
 
-		desiredCondition, err := svc.FindByUserId(ctx, "userId")
+		matchJob, err := svc.FindByUserId(ctx, "userId")
 		require.NoError(t, err)
 
-		require.Equal(t, "userId", desiredCondition.UserId)
-		require.False(t, desiredCondition.AgreeToMail)
-		require.Len(t, desiredCondition.Conditions, 0)
+		require.Equal(t, "userId", matchJob.UserId)
+		require.False(t, matchJob.AgreeToMail)
+		require.Len(t, matchJob.Conditions, 0)
 	})
 
 	t.Run("return one condition after insert", func(t *testing.T) {
@@ -36,14 +36,14 @@ func TestConditions(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, isSuccess)
 
-		desiredCondition, err := svc.FindByUserId(ctx, "userId")
+		matchJob, err := svc.FindByUserId(ctx, "userId")
 		require.NoError(t, err)
 
-		require.Equal(t, "userId", desiredCondition.UserId)
-		require.False(t, desiredCondition.AgreeToMail)
-		require.Len(t, desiredCondition.Conditions, 1)
+		require.Equal(t, "userId", matchJob.UserId)
+		require.False(t, matchJob.AgreeToMail)
+		require.Len(t, matchJob.Conditions, 1)
 
-		require.Equal(t, savedCondition, desiredCondition.Conditions[0])
+		require.Equal(t, savedCondition, matchJob.Conditions[0])
 	})
 
 	t.Run("return updated condition after update", func(t *testing.T) {
@@ -61,14 +61,14 @@ func TestConditions(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, isSuccess)
 
-		desiredCondition, err := svc.FindByUserId(ctx, "userId")
+		matchJob, err := svc.FindByUserId(ctx, "userId")
 		require.NoError(t, err)
 
-		require.Equal(t, "userId", desiredCondition.UserId)
-		require.False(t, desiredCondition.AgreeToMail)
-		require.Len(t, desiredCondition.Conditions, 1)
+		require.Equal(t, "userId", matchJob.UserId)
+		require.False(t, matchJob.AgreeToMail)
+		require.Len(t, matchJob.Conditions, 1)
 
-		require.Equal(t, updatedCondition, desiredCondition.Conditions[0])
+		require.Equal(t, updatedCondition, matchJob.Conditions[0])
 	})
 
 	t.Run("return empty after delete", func(t *testing.T) {
@@ -85,12 +85,12 @@ func TestConditions(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, isSuccess)
 
-		desiredCondition, err := svc.FindByUserId(ctx, "userId")
+		matchJob, err := svc.FindByUserId(ctx, "userId")
 		require.NoError(t, err)
 
-		require.Equal(t, "userId", desiredCondition.UserId)
-		require.False(t, desiredCondition.AgreeToMail)
-		require.Len(t, desiredCondition.Conditions, 0)
+		require.Equal(t, "userId", matchJob.UserId)
+		require.False(t, matchJob.AgreeToMail)
+		require.Len(t, matchJob.Conditions, 0)
 	})
 
 	t.Run("return error when insert condition with zero limit", func(t *testing.T) {
@@ -171,11 +171,11 @@ func TestAgreeToMail(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, isSuccess)
 
-		desiredCondition, err := svc.FindByUserId(ctx, userId)
+		matchJob, err := svc.FindByUserId(ctx, userId)
 		require.NoError(t, err)
 
-		require.Equal(t, userId, desiredCondition.UserId)
-		require.Equal(t, agreeToMail, desiredCondition.AgreeToMail)
+		require.Equal(t, userId, matchJob.UserId)
+		require.Equal(t, agreeToMail, matchJob.AgreeToMail)
 	}
 	t.Run("after update agreeToMail to false", func(t *testing.T) {
 		testUpdateAgreeToMail(t, false)
@@ -186,10 +186,10 @@ func TestAgreeToMail(t *testing.T) {
 	})
 }
 
-func initService(t *testing.T) service.ConditionService {
-	conditionRepo := repo.NewConditionRepo(tinit.InitDB(t))
+func initService(t *testing.T) service.MatchJobService {
+	matchJobRepo := repo.NewMatchJobRepo(tinit.InitDB(t))
 
-	return service.NewConditionService(conditionRepo)
+	return service.NewMatchJobService(matchJobRepo)
 }
 
 func newCondition() *condition.Condition {
