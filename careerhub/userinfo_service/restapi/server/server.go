@@ -36,35 +36,35 @@ func (r *RestApiGrpcServer) FindMatchJob(ctx context.Context, req *restapi_grpc.
 	}, nil
 }
 
-func (r *RestApiGrpcServer) AddCondition(ctx context.Context, req *restapi_grpc.AddConditionRequest) (*restapi_grpc.IsSuccess, error) {
+func (r *RestApiGrpcServer) AddCondition(ctx context.Context, req *restapi_grpc.AddConditionRequest) (*restapi_grpc.IsSuccessResponse, error) {
 	newCondition := convertConditionToDomain("", req.Condition.ConditionName, req.Condition.Query)
 	success, err := r.conditionService.InsertCondition(ctx, req.UserId, uint(req.LimitCount), newCondition)
 
-	return &restapi_grpc.IsSuccess{
-		Value: success,
+	return &restapi_grpc.IsSuccessResponse{
+		IsSuccess: success,
 	}, err
 }
-func (r *RestApiGrpcServer) UpdateCondition(ctx context.Context, req *restapi_grpc.UpdateConditionRequest) (*restapi_grpc.IsSuccess, error) {
+func (r *RestApiGrpcServer) UpdateCondition(ctx context.Context, req *restapi_grpc.UpdateConditionRequest) (*restapi_grpc.IsSuccessResponse, error) {
 	updateCondition := convertConditionToDomain(req.Condition.ConditionId, req.Condition.ConditionName, req.Condition.Query)
 	success, err := r.conditionService.UpdateCondition(ctx, req.UserId, updateCondition)
 
-	return &restapi_grpc.IsSuccess{
-		Value: success,
+	return &restapi_grpc.IsSuccessResponse{
+		IsSuccess: success,
 	}, err
 }
-func (r *RestApiGrpcServer) DeleteCondition(ctx context.Context, req *restapi_grpc.DeleteConditionRequest) (*restapi_grpc.IsSuccess, error) {
+func (r *RestApiGrpcServer) DeleteCondition(ctx context.Context, req *restapi_grpc.DeleteConditionRequest) (*restapi_grpc.IsSuccessResponse, error) {
 	success, err := r.conditionService.DeleteCondition(ctx, req.UserId, req.ConditionId)
 
-	return &restapi_grpc.IsSuccess{
-		Value: success,
+	return &restapi_grpc.IsSuccessResponse{
+		IsSuccess: success,
 	}, err
 }
 
-func (r *RestApiGrpcServer) UpdateAgreeToMail(ctx context.Context, req *restapi_grpc.UpdateAgreeToMailRequest) (*restapi_grpc.IsSuccess, error) {
+func (r *RestApiGrpcServer) UpdateAgreeToMail(ctx context.Context, req *restapi_grpc.UpdateAgreeToMailRequest) (*restapi_grpc.IsSuccessResponse, error) {
 	success, err := r.conditionService.UpdateAgreeToMail(ctx, req.UserId, req.AgreeToMail)
 
-	return &restapi_grpc.IsSuccess{
-		Value: success,
+	return &restapi_grpc.IsSuccessResponse{
+		IsSuccess: success,
 	}, err
 }
 

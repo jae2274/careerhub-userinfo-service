@@ -6,7 +6,6 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/history"
 	condition "github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/matchjob"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/mongocfg"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/vars"
@@ -22,7 +21,6 @@ func InitDB(t *testing.T) *mongo.Database {
 	checkError(t, err)
 
 	initCollection(t, db, &condition.MatchJob{})
-	initCollection(t, db, &history.History{})
 
 	return db
 }
