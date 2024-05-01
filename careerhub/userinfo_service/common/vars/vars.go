@@ -12,10 +12,11 @@ type DBUser struct {
 }
 
 type Vars struct {
-	MongoUri        string
-	DbName          string
-	DBUser          *DBUser
-	RestApiGrpcPort int
+	MongoUri          string
+	DbName            string
+	DBUser            *DBUser
+	RestApiGrpcPort   int
+	SuggesterGrpcPort int
 }
 
 type ErrNotExistedVar struct {
@@ -62,11 +63,21 @@ func Variables() (*Vars, error) {
 		return nil, fmt.Errorf("RESTAPI_GRPC_PORT is not integer.\tREST_API_PORT: %s", restApiGrpcPort)
 	}
 
+	suggesterGrpcPort, err := getFromEnv("SUGGESTER_GRPC_PORT")
+	if err != nil {
+		return nil, err
+	}
+	suggesterGrpcPortInt, err := strconv.ParseInt(suggesterGrpcPort, 10, 32)
+	if err != nil {
+		return nil, fmt.Errorf("SUGGESTER_GRPC_PORT is not integer.\tSUGGESTER_GRPC_PORT: %s", suggesterGrpcPort)
+	}
+
 	return &Vars{
-		MongoUri:        mongoUri,
-		DBUser:          dbUser,
-		DbName:          dbName,
-		RestApiGrpcPort: int(restApiGrpcPortInt),
+		MongoUri:          mongoUri,
+		DBUser:            dbUser,
+		DbName:            dbName,
+		RestApiGrpcPort:   int(restApiGrpcPortInt),
+		SuggesterGrpcPort: int(suggesterGrpcPortInt),
 	}, nil
 }
 
