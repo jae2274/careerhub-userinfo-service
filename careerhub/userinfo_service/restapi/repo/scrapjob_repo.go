@@ -85,7 +85,7 @@ func (r *ScrapJobRepoImpl) AddTag(ctx context.Context, userId, site, postingId, 
 		return false, terr.Wrap(err)
 	}
 
-	if result.ModifiedCount == 0 {
+	if result.MatchedCount == 0 && result.ModifiedCount == 0 {
 		return false, nil
 	}
 
@@ -105,7 +105,7 @@ func (r *ScrapJobRepoImpl) RemoveTag(ctx context.Context, userId, site, postingI
 		return false, terr.Wrap(err)
 	}
 
-	if result.ModifiedCount == 0 {
+	if result.MatchedCount == 0 && result.ModifiedCount == 0 {
 		return false, nil
 	}
 
