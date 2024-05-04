@@ -28,7 +28,7 @@ func TestSuggesterGrpc(t *testing.T) {
 		tinit.InitDB(t)
 		ctx := context.Background()
 
-		restapiClient := tinit.InitRestapiClient(t)
+		restapiClient := tinit.InitMatchJobGrpcClient(t)
 		updateAgreeToMail := func(ctx context.Context, req *restapi_grpc.UpdateAgreeToMailRequest) {
 			isSuccess, err := restapiClient.UpdateAgreeToMail(ctx, req)
 			require.NoError(t, err)

@@ -17,9 +17,8 @@ import (
 )
 
 func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
-	matchJobRepo := repo.NewMatchJobRepo(db)
-	conditionService := service.NewMatchJobService(matchJobRepo)
-	restApiService := server.NewMatchJobGrpcServer(conditionService)
+	matchJobGrpcServer := runMatchJobGrpcServer(ctx, grpcPort, db)
+	scrapJobGrpcServer := runScrapJobGrpcServer(ctx, grpcPort, db)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
@@ -29,7 +28,8 @@ func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
 	llog.Msg("Start restapi grpc server").Level(llog.INFO).Data("port", grpcPort).Log(ctx)
 
 	grpcServer := grpc.NewServer(utils.Middlewares()...)
-	restapi_grpc.RegisterMatchJobGrpcServer(grpcServer, restApiService)
+	restapi_grpc.RegisterMatchJobGrpcServer(grpcServer, matchJobGrpcServer)
+	restapi_grpc.RegisterScrapJobGrpcServer(grpcServer, scrapJobGrpcServer)
 
 	err = grpcServer.Serve(listener)
 	if err != nil {
@@ -37,4 +37,17 @@ func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
 	}
 
 	return nil
+}
+
+func runMatchJobGrpcServer(ctx context.Context, grpcPort int, db *mongo.Database) restapi_grpc.MatchJobGrpcServer {
+	matchJobRepo := repo.NewMatchJobRepo(db)
+	conditionService := service.NewMatchJobService(matchJobRepo)
+
+	return server.NewMatchJobGrpcServer(conditionService)
+}
+
+func runScrapJobGrpcServer(ctx context.Context, grpcPort int, db *mongo.Database) restapi_grpc.ScrapJobGrpcServer {
+	scrapJobRepo := repo.NewScrapJobRepo(db)
+
+	return server.NewScrapJobGrpcServer(scrapJobRepo)
 }

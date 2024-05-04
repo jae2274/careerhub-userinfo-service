@@ -6,7 +6,8 @@ import (
 	"runtime"
 	"testing"
 
-	condition "github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/matchjob"
+	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/matchjob"
+	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/scrapjob"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/mongocfg"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/vars"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,7 +21,8 @@ func InitDB(t *testing.T) *mongo.Database {
 	db, err := mongocfg.NewDatabase(envVars.MongoUri, envVars.DbName, envVars.DBUser)
 	checkError(t, err)
 
-	initCollection(t, db, &condition.MatchJob{})
+	initCollection(t, db, &matchjob.MatchJob{})
+	initCollection(t, db, &scrapjob.ScrapJob{})
 
 	return db
 }

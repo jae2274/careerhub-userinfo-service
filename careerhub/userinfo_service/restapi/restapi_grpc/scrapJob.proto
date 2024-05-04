@@ -6,7 +6,7 @@ option go_package = "careerhub/userinfo_service/restapi_grpc";
 import "google/protobuf/empty.proto";
 
 
-service ScrapJobService {
+service ScrapJobGrpc {
     rpc GetScrapJobs (GetScrapJobsRequest) returns (GetScrapJobsResponse);
   rpc AddScrapJob (AddScrapJobRequest) returns (google.protobuf.Empty);
     rpc RemoveScrapJob (RemoveScrapJobRequest) returns (google.protobuf.Empty);
@@ -21,8 +21,8 @@ message GetScrapJobsResponse {
 }
 
 message ScrapJob{
-    string userId = 1;
     string site = 2;
+    string postingId = 3;
 }
 
 message AddScrapJobRequest {

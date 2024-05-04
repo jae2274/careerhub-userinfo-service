@@ -15,7 +15,7 @@ type Vars struct {
 	MongoUri          string
 	DbName            string
 	DBUser            *DBUser
-	MatchJobGrpcPort  int
+	RestapiGrpcPort   int
 	SuggesterGrpcPort int
 }
 
@@ -76,7 +76,7 @@ func Variables() (*Vars, error) {
 		MongoUri:          mongoUri,
 		DBUser:            dbUser,
 		DbName:            dbName,
-		MatchJobGrpcPort:  int(matchJobGrpcPortInt),
+		RestapiGrpcPort:   int(matchJobGrpcPortInt),
 		SuggesterGrpcPort: int(suggesterGrpcPortInt),
 	}, nil
 }
