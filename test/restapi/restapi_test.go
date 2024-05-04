@@ -7,10 +7,12 @@ import (
 
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/restapi_grpc"
 	"github.com/jae2274/careerhub-userinfo-service/test/tinit"
+	"github.com/jae2274/goutils/ptr"
 	"github.com/stretchr/testify/require"
 )
 
-func TestRestapiGrpc(t *testing.T) {
+func TestScrapJobGrpc(t *testing.T) {
+	tinit.InitDB(t)
 	cancelFunc := tinit.RunTestApp(t)
 	defer cancelFunc()
 
@@ -140,6 +142,467 @@ func TestRestapiGrpc(t *testing.T) {
 		require.Len(t, res.ScrapJobs, 1)
 		require.Equal(t, reqs[1].Site, res.ScrapJobs[0].Site)
 		require.Equal(t, reqs[1].PostingId, res.ScrapJobs[0].PostingId)
+	})
+
+	t.Run("return scrapJobs without removed with different userId", func(t *testing.T) {
+	})
+}
+
+func TestScrapJobTags(t *testing.T) {
+	tinit.InitDB(t)
+	cancelFunc := tinit.RunTestApp(t)
+	defer cancelFunc()
+
+	t.Run("return empty", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		_, err := client.AddScrapJob(ctx, newAddScrapJobRequest(userId, 1))
+		require.NoError(t, err)
+
+		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId})
+		require.NoError(t, err)
+
+		require.Len(t, res.ScrapJobs, 1)
+		require.Empty(t, res.ScrapJobs[0].Tags)
+	})
+
+	t.Run("return one tag", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tag := "testTag"
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+		_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    req.UserId,
+			Site:      req.Site,
+			PostingId: req.PostingId,
+			Tag:       tag,
+		})
+		require.NoError(t, err)
+
+		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId})
+		require.NoError(t, err)
+
+		require.Len(t, res.ScrapJobs, 1)
+		require.Len(t, res.ScrapJobs[0].Tags, 1)
+		require.Equal(t, tag, res.ScrapJobs[0].Tags[0])
+	})
+
+	t.Run("return tags", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tags := []string{"testTag1", "testTag2"}
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		for _, tag := range tags {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req.UserId,
+				Site:      req.Site,
+				PostingId: req.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId})
+		require.NoError(t, err)
+
+		require.Len(t, res.ScrapJobs, 1)
+		require.Len(t, res.ScrapJobs[0].Tags, len(tags))
+		for i, tag := range tags {
+			require.Equal(t, tag, res.ScrapJobs[0].Tags[i])
+		}
+	})
+
+	t.Run("return unique tag though add duplicate tags", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tag := "testTag"
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		for i := 0; i < 2; i++ {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req.UserId,
+				Site:      req.Site,
+				PostingId: req.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId})
+		require.NoError(t, err)
+
+		require.Len(t, res.ScrapJobs, 1)
+		require.Len(t, res.ScrapJobs[0].Tags, 1)
+		require.Equal(t, tag, res.ScrapJobs[0].Tags[0])
+	})
+
+	t.Run("return tag without removed", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tags := []string{"testTag1", "testTag2"}
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		for _, tag := range tags {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req.UserId,
+				Site:      req.Site,
+				PostingId: req.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		_, err = client.RemoveTag(ctx, &restapi_grpc.RemoveTagRequest{
+			UserId:    req.UserId,
+			Site:      req.Site,
+			PostingId: req.PostingId,
+			Tag:       tags[0],
+		})
+		require.NoError(t, err)
+
+		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId})
+		require.NoError(t, err)
+
+		require.Len(t, res.ScrapJobs, 1)
+		require.Len(t, res.ScrapJobs[0].Tags, 1)
+		require.Equal(t, tags[1], res.ScrapJobs[0].Tags[0])
+	})
+
+	t.Run("return empty scrapTags ", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		res, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId})
+		require.NoError(t, err)
+
+		require.Empty(t, res.Tags)
+	})
+
+	t.Run("return scrapTags from one scrapJob", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tags := []string{"testTag1", "testTag2"}
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		for _, tag := range tags {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req.UserId,
+				Site:      req.Site,
+				PostingId: req.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		res, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId})
+		require.NoError(t, err)
+		require.Len(t, res.Tags, len(tags))
+		require.Equal(t, tags, res.Tags)
+	})
+
+	t.Run("return scrapTags from multiple scrapJobs", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tags1 := []string{"testTag1", "testTag2"}
+		tags2 := []string{"testTag3", "testTag4"}
+		req1 := newAddScrapJobRequest(userId, 1)
+		req2 := newAddScrapJobRequest(userId, 2)
+		_, err := client.AddScrapJob(ctx, req1)
+		require.NoError(t, err)
+		_, err = client.AddScrapJob(ctx, req2)
+		require.NoError(t, err)
+
+		for _, tag := range tags1 {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req1.UserId,
+				Site:      req1.Site,
+				PostingId: req1.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		for _, tag := range tags2 {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req2.UserId,
+				Site:      req2.Site,
+				PostingId: req2.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		res, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId})
+		require.NoError(t, err)
+		require.Len(t, res.Tags, len(tags1)+len(tags2))
+		require.Contains(t, res.Tags, tags1[0])
+		require.Contains(t, res.Tags, tags1[1])
+		require.Contains(t, res.Tags, tags2[0])
+		require.Contains(t, res.Tags, tags2[1])
+	})
+
+	t.Run("return unique scrapTags though have duplicate tags", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tags1 := []string{"testTag1", "testTag2", "testTag3"}
+		tags2 := []string{"testTag1", "testTag2", "testTag4"}
+		req1 := newAddScrapJobRequest(userId, 1)
+		req2 := newAddScrapJobRequest(userId, 2)
+		_, err := client.AddScrapJob(ctx, req1)
+		require.NoError(t, err)
+		_, err = client.AddScrapJob(ctx, req2)
+		require.NoError(t, err)
+
+		for _, tag := range tags1 {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req1.UserId,
+				Site:      req1.Site,
+				PostingId: req1.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		for _, tag := range tags2 {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req2.UserId,
+				Site:      req2.Site,
+				PostingId: req2.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		res, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId})
+		require.NoError(t, err)
+		require.Len(t, res.Tags, 4)
+		require.Contains(t, res.Tags, tags1[0])
+		require.Contains(t, res.Tags, tags1[1])
+		require.Contains(t, res.Tags, tags1[2])
+		require.Contains(t, res.Tags, tags2[2])
+	})
+
+	t.Run("return scrapTags without removed tag", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tags := []string{"testTag1", "testTag2"}
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		for _, tag := range tags {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req.UserId,
+				Site:      req.Site,
+				PostingId: req.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		_, err = client.RemoveTag(ctx, &restapi_grpc.RemoveTagRequest{
+			UserId:    req.UserId,
+			Site:      req.Site,
+			PostingId: req.PostingId,
+			Tag:       tags[0],
+		})
+		require.NoError(t, err)
+
+		res, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId})
+		require.NoError(t, err)
+		require.Len(t, res.Tags, 1)
+		require.Equal(t, tags[1], res.Tags[0])
+	})
+
+	t.Run("return scrapTags with different userId", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId1 := "testUserId1"
+		userId2 := "testUserId2"
+		tags1 := []string{"testTag1", "testTag2"}
+		tags2 := []string{"testTag3", "testTag4"}
+		req1 := newAddScrapJobRequest(userId1, 1)
+		req2 := newAddScrapJobRequest(userId2, 1)
+		_, err := client.AddScrapJob(ctx, req1)
+		require.NoError(t, err)
+		_, err = client.AddScrapJob(ctx, req2)
+		require.NoError(t, err)
+
+		for _, tag := range tags1 {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req1.UserId,
+				Site:      req1.Site,
+				PostingId: req1.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		for _, tag := range tags2 {
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    req2.UserId,
+				Site:      req2.Site,
+				PostingId: req2.PostingId,
+				Tag:       tag,
+			})
+			require.NoError(t, err)
+		}
+
+		res2, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId2})
+		require.NoError(t, err)
+		require.Len(t, res2.Tags, len(tags2))
+		require.Contains(t, res2.Tags, tags2[0])
+		require.Contains(t, res2.Tags, tags2[1])
+	})
+
+	t.Run("return empty scrapJob cause empty tag", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tag := "testTag"
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId, Tag: ptr.P(tag)})
+		require.NoError(t, err)
+		require.Empty(t, res.ScrapJobs)
+	})
+
+	t.Run("return empty scrapJob cause different tag", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tag := "testTag"
+		diffTag := "diffTag"
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    req.UserId,
+			Site:      req.Site,
+			PostingId: req.PostingId,
+			Tag:       diffTag,
+		})
+		require.NoError(t, err)
+
+		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId, Tag: ptr.P(tag)})
+		require.NoError(t, err)
+		require.Empty(t, res.ScrapJobs)
+	})
+
+	t.Run("return scrapJob with tag", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tag := "testTag"
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    req.UserId,
+			Site:      req.Site,
+			PostingId: req.PostingId,
+			Tag:       tag,
+		})
+		require.NoError(t, err)
+
+		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId, Tag: ptr.P(tag)})
+		require.NoError(t, err)
+		require.Len(t, res.ScrapJobs, 1)
+		require.Equal(t, req.Site, res.ScrapJobs[0].Site)
+		require.Equal(t, req.PostingId, res.ScrapJobs[0].PostingId)
+	})
+
+	t.Run("return scrapJobs with tag from multiple scrapJobs", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tag := "testTag1"
+
+		tags1 := []string{tag, "testTag2"}
+		tags2 := []string{tag, "testTag3"}
+		tags3 := []string{"testTag3", "testTag5"}
+		req1 := newAddScrapJobRequest(userId, 1)
+		req2 := newAddScrapJobRequest(userId, 2)
+		req3 := newAddScrapJobRequest(userId, 3)
+		reqs := []*restapi_grpc.AddScrapJobRequest{req1, req2, req3}
+		tagsList := [][]string{tags1, tags2, tags3}
+
+		for i, req := range reqs {
+			_, err := client.AddScrapJob(ctx, req)
+			require.NoError(t, err)
+
+			for _, tag := range tagsList[i] {
+				_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+					UserId:    req.UserId,
+					Site:      req.Site,
+					PostingId: req.PostingId,
+					Tag:       tag,
+				})
+				require.NoError(t, err)
+			}
+		}
+
+		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId, Tag: ptr.P(tag)})
+		require.NoError(t, err)
+		require.Len(t, res.ScrapJobs, 2)
+		for i, req := range reqs[:2] {
+			require.Equal(t, req.Site, res.ScrapJobs[i].Site)
+			require.Equal(t, req.PostingId, res.ScrapJobs[i].PostingId)
+		}
 	})
 }
 

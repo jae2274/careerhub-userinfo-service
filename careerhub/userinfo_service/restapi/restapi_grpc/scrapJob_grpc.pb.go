@@ -26,6 +26,9 @@ type ScrapJobGrpcClient interface {
 	GetScrapJobs(ctx context.Context, in *GetScrapJobsRequest, opts ...grpc.CallOption) (*GetScrapJobsResponse, error)
 	AddScrapJob(ctx context.Context, in *AddScrapJobRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RemoveScrapJob(ctx context.Context, in *RemoveScrapJobRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AddTag(ctx context.Context, in *AddTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RemoveTag(ctx context.Context, in *RemoveTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetScrapTags(ctx context.Context, in *GetScrapTagsRequest, opts ...grpc.CallOption) (*GetScrapTagsResponse, error)
 }
 
 type scrapJobGrpcClient struct {
@@ -63,6 +66,33 @@ func (c *scrapJobGrpcClient) RemoveScrapJob(ctx context.Context, in *RemoveScrap
 	return out, nil
 }
 
+func (c *scrapJobGrpcClient) AddTag(ctx context.Context, in *AddTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.ScrapJobGrpc/AddTag", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *scrapJobGrpcClient) RemoveTag(ctx context.Context, in *RemoveTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.ScrapJobGrpc/RemoveTag", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *scrapJobGrpcClient) GetScrapTags(ctx context.Context, in *GetScrapTagsRequest, opts ...grpc.CallOption) (*GetScrapTagsResponse, error) {
+	out := new(GetScrapTagsResponse)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.ScrapJobGrpc/GetScrapTags", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ScrapJobGrpcServer is the server API for ScrapJobGrpc service.
 // All implementations must embed UnimplementedScrapJobGrpcServer
 // for forward compatibility
@@ -70,6 +100,9 @@ type ScrapJobGrpcServer interface {
 	GetScrapJobs(context.Context, *GetScrapJobsRequest) (*GetScrapJobsResponse, error)
 	AddScrapJob(context.Context, *AddScrapJobRequest) (*emptypb.Empty, error)
 	RemoveScrapJob(context.Context, *RemoveScrapJobRequest) (*emptypb.Empty, error)
+	AddTag(context.Context, *AddTagRequest) (*emptypb.Empty, error)
+	RemoveTag(context.Context, *RemoveTagRequest) (*emptypb.Empty, error)
+	GetScrapTags(context.Context, *GetScrapTagsRequest) (*GetScrapTagsResponse, error)
 	mustEmbedUnimplementedScrapJobGrpcServer()
 }
 
@@ -85,6 +118,15 @@ func (UnimplementedScrapJobGrpcServer) AddScrapJob(context.Context, *AddScrapJob
 }
 func (UnimplementedScrapJobGrpcServer) RemoveScrapJob(context.Context, *RemoveScrapJobRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveScrapJob not implemented")
+}
+func (UnimplementedScrapJobGrpcServer) AddTag(context.Context, *AddTagRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddTag not implemented")
+}
+func (UnimplementedScrapJobGrpcServer) RemoveTag(context.Context, *RemoveTagRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveTag not implemented")
+}
+func (UnimplementedScrapJobGrpcServer) GetScrapTags(context.Context, *GetScrapTagsRequest) (*GetScrapTagsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetScrapTags not implemented")
 }
 func (UnimplementedScrapJobGrpcServer) mustEmbedUnimplementedScrapJobGrpcServer() {}
 
@@ -153,6 +195,60 @@ func _ScrapJobGrpc_RemoveScrapJob_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ScrapJobGrpc_AddTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ScrapJobGrpcServer).AddTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.ScrapJobGrpc/AddTag",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ScrapJobGrpcServer).AddTag(ctx, req.(*AddTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ScrapJobGrpc_RemoveTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ScrapJobGrpcServer).RemoveTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.ScrapJobGrpc/RemoveTag",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ScrapJobGrpcServer).RemoveTag(ctx, req.(*RemoveTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ScrapJobGrpc_GetScrapTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetScrapTagsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ScrapJobGrpcServer).GetScrapTags(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.ScrapJobGrpc/GetScrapTags",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ScrapJobGrpcServer).GetScrapTags(ctx, req.(*GetScrapTagsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ScrapJobGrpc_ServiceDesc is the grpc.ServiceDesc for ScrapJobGrpc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -171,6 +267,18 @@ var ScrapJobGrpc_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveScrapJob",
 			Handler:    _ScrapJobGrpc_RemoveScrapJob_Handler,
+		},
+		{
+			MethodName: "AddTag",
+			Handler:    _ScrapJobGrpc_AddTag_Handler,
+		},
+		{
+			MethodName: "RemoveTag",
+			Handler:    _ScrapJobGrpc_RemoveTag_Handler,
+		},
+		{
+			MethodName: "GetScrapTags",
+			Handler:    _ScrapJobGrpc_GetScrapTags_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

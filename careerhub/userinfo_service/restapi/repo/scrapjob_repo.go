@@ -10,9 +10,12 @@ import (
 )
 
 type ScrapJobRepo interface {
-	GetScrapJobs(ctx context.Context, userId string) ([]*scrapjob.ScrapJob, error)
+	GetScrapJobs(ctx context.Context, userId string, tag *string) ([]*scrapjob.ScrapJob, error)
 	AddScrapJob(ctx context.Context, scrapJob *scrapjob.ScrapJob) error
 	RemoveScrapJob(ctx context.Context, userId, site, postingId string) error
+	AddTag(ctx context.Context, userId, site, postingId, tag string) error
+	RemoveTag(ctx context.Context, userId, site, postingId, tag string) error
+	GetScrapTags(ctx context.Context, userId string) ([]string, error)
 }
 
 type ScrapJobRepoImpl struct {
@@ -25,8 +28,12 @@ func NewScrapJobRepo(db *mongo.Database) ScrapJobRepo {
 	}
 }
 
-func (r *ScrapJobRepoImpl) GetScrapJobs(ctx context.Context, userId string) ([]*scrapjob.ScrapJob, error) {
-	cur, err := r.col.Find(ctx, bson.M{scrapjob.UserIdField: userId})
+func (r *ScrapJobRepoImpl) GetScrapJobs(ctx context.Context, userId string, tag *string) ([]*scrapjob.ScrapJob, error) {
+	filter := bson.M{scrapjob.UserIdField: userId}
+	if tag != nil {
+		filter[scrapjob.TagsField] = *tag
+	}
+	cur, err := r.col.Find(ctx, filter)
 	if err != nil {
 		return nil, terr.Wrap(err)
 	}
@@ -58,4 +65,56 @@ func (r *ScrapJobRepoImpl) RemoveScrapJob(ctx context.Context, userId, site, pos
 		return terr.Wrap(err)
 	}
 	return nil
+}
+
+func (r *ScrapJobRepoImpl) AddTag(ctx context.Context, userId, site, postingId, tag string) error {
+	_, err := r.col.UpdateOne(ctx, bson.M{
+		scrapjob.UserIdField:    userId,
+		scrapjob.SiteField:      site,
+		scrapjob.PostingIdField: postingId,
+	}, bson.M{
+		"$addToSet": bson.M{scrapjob.TagsField: tag},
+	})
+
+	if err != nil {
+		return terr.Wrap(err)
+	}
+
+	return nil
+}
+
+func (r *ScrapJobRepoImpl) RemoveTag(ctx context.Context, userId, site, postingId, tag string) error {
+	_, err := r.col.UpdateOne(ctx, bson.M{
+		scrapjob.UserIdField:    userId,
+		scrapjob.SiteField:      site,
+		scrapjob.PostingIdField: postingId,
+	}, bson.M{
+		"$pull": bson.M{scrapjob.TagsField: tag},
+	})
+
+	if err != nil {
+		return terr.Wrap(err)
+	}
+
+	return nil
+}
+
+func (r *ScrapJobRepoImpl) GetScrapTags(ctx context.Context, userId string) ([]string, error) {
+	results, err := r.col.Distinct(ctx, scrapjob.TagsField, bson.M{scrapjob.UserIdField: userId})
+
+	if err != nil {
+		return nil, terr.Wrap(err)
+	}
+
+	tags := make([]string, len(results))
+	for i, result := range results {
+		tag, ok := result.(string)
+		if !ok {
+			return nil, terr.New("invalid tags type")
+		}
+
+		tags[i] = tag
+	}
+
+	return tags, nil
 }

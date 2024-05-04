@@ -21,7 +21,7 @@ func NewScrapJobGrpcServer(scrapJobRepo repo.ScrapJobRepo) restapi_grpc.ScrapJob
 }
 
 func (s *ScrapJobGrpcServer) GetScrapJobs(ctx context.Context, in *restapi_grpc.GetScrapJobsRequest) (*restapi_grpc.GetScrapJobsResponse, error) {
-	scrapJobs, err := s.scrapJobRepo.GetScrapJobs(ctx, in.UserId)
+	scrapJobs, err := s.scrapJobRepo.GetScrapJobs(ctx, in.UserId, in.Tag)
 	if err != nil {
 		return nil, err
 	}
@@ -31,6 +31,7 @@ func (s *ScrapJobGrpcServer) GetScrapJobs(ctx context.Context, in *restapi_grpc.
 		grpcScrapJobs[i] = &restapi_grpc.ScrapJob{
 			Site:      scrapJob.Site,
 			PostingId: scrapJob.PostingId,
+			Tags:      scrapJob.Tags,
 		}
 	}
 
@@ -42,6 +43,7 @@ func (s *ScrapJobGrpcServer) AddScrapJob(ctx context.Context, in *restapi_grpc.A
 		UserId:    in.UserId,
 		Site:      in.Site,
 		PostingId: in.PostingId,
+		Tags:      []string{},
 	}
 
 	err := s.scrapJobRepo.AddScrapJob(ctx, scrapJob)
@@ -59,4 +61,31 @@ func (s *ScrapJobGrpcServer) RemoveScrapJob(ctx context.Context, in *restapi_grp
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *ScrapJobGrpcServer) AddTag(ctx context.Context, in *restapi_grpc.AddTagRequest) (*emptypb.Empty, error) {
+	err := s.scrapJobRepo.AddTag(ctx, in.UserId, in.Site, in.PostingId, in.Tag)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *ScrapJobGrpcServer) RemoveTag(ctx context.Context, in *restapi_grpc.RemoveTagRequest) (*emptypb.Empty, error) {
+	err := s.scrapJobRepo.RemoveTag(ctx, in.UserId, in.Site, in.PostingId, in.Tag)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+func (s *ScrapJobGrpcServer) GetScrapTags(ctx context.Context, in *restapi_grpc.GetScrapTagsRequest) (*restapi_grpc.GetScrapTagsResponse, error) {
+	tags, err := s.scrapJobRepo.GetScrapTags(ctx, in.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &restapi_grpc.GetScrapTagsResponse{Tags: tags}, nil
 }

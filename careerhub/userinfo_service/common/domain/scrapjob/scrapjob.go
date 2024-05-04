@@ -12,12 +12,14 @@ const (
 	UserIdField    = "userId"
 	SiteField      = "site"
 	PostingIdField = "postingId"
+	TagsField      = "tags"
 )
 
 type ScrapJob struct {
-	UserId    string `bson:"userId"`
-	Site      string `bson:"site"`
-	PostingId string `bson:"postingId"`
+	UserId    string   `bson:"userId"`
+	Site      string   `bson:"site"`
+	PostingId string   `bson:"postingId"`
+	Tags      []string `bson:"tags"`
 }
 
 func (*ScrapJob) Collection() string {
