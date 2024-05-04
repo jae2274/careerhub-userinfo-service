@@ -26,7 +26,6 @@ func TestScrapJobGrpc(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Empty(t, res.ScrapJobs)
-
 	})
 
 	t.Run("return one scrapJob", func(t *testing.T) {
@@ -129,12 +128,13 @@ func TestScrapJobGrpc(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		_, err := client.RemoveScrapJob(ctx, &restapi_grpc.RemoveScrapJobRequest{
+		IsExisted, err := client.RemoveScrapJob(ctx, &restapi_grpc.RemoveScrapJobRequest{
 			UserId:    userId,
 			Site:      reqs[0].Site,
 			PostingId: reqs[0].PostingId,
 		})
 		require.NoError(t, err)
+		require.True(t, IsExisted.IsExisted)
 
 		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId})
 
@@ -144,11 +144,21 @@ func TestScrapJobGrpc(t *testing.T) {
 		require.Equal(t, reqs[1].PostingId, res.ScrapJobs[0].PostingId)
 	})
 
-	t.Run("return scrapJobs without removed with different userId", func(t *testing.T) {
+	t.Run("return isExisted false when remove non-existed", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+		IsExisted, err := client.RemoveScrapJob(ctx, &restapi_grpc.RemoveScrapJobRequest{
+			UserId:    "testUserId",
+			Site:      "testSite",
+			PostingId: "testPostingId",
+		})
+		require.NoError(t, err)
+		require.False(t, IsExisted.IsExisted)
 	})
 }
 
-func TestScrapJobTags(t *testing.T) {
+func TestTags(t *testing.T) {
 	tinit.InitDB(t)
 	cancelFunc := tinit.RunTestApp(t)
 	defer cancelFunc()
@@ -179,13 +189,14 @@ func TestScrapJobTags(t *testing.T) {
 		req := newAddScrapJobRequest(userId, 1)
 		_, err := client.AddScrapJob(ctx, req)
 		require.NoError(t, err)
-		_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+		isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 			UserId:    req.UserId,
 			Site:      req.Site,
 			PostingId: req.PostingId,
 			Tag:       tag,
 		})
 		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
 
 		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId})
 		require.NoError(t, err)
@@ -207,13 +218,14 @@ func TestScrapJobTags(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, tag := range tags {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req.UserId,
 				Site:      req.Site,
 				PostingId: req.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
 		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId})
@@ -238,7 +250,7 @@ func TestScrapJobTags(t *testing.T) {
 		require.NoError(t, err)
 
 		for i := 0; i < 2; i++ {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			_, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req.UserId,
 				Site:      req.Site,
 				PostingId: req.PostingId,
@@ -267,22 +279,24 @@ func TestScrapJobTags(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, tag := range tags {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req.UserId,
 				Site:      req.Site,
 				PostingId: req.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
-		_, err = client.RemoveTag(ctx, &restapi_grpc.RemoveTagRequest{
+		isExisted, err := client.RemoveTag(ctx, &restapi_grpc.RemoveTagRequest{
 			UserId:    req.UserId,
 			Site:      req.Site,
 			PostingId: req.PostingId,
 			Tag:       tags[0],
 		})
 		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
 
 		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId})
 		require.NoError(t, err)
@@ -316,13 +330,14 @@ func TestScrapJobTags(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, tag := range tags {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req.UserId,
 				Site:      req.Site,
 				PostingId: req.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
 		res, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId})
@@ -347,23 +362,25 @@ func TestScrapJobTags(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, tag := range tags1 {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req1.UserId,
 				Site:      req1.Site,
 				PostingId: req1.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
 		for _, tag := range tags2 {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req2.UserId,
 				Site:      req2.Site,
 				PostingId: req2.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
 		res, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId})
@@ -391,23 +408,25 @@ func TestScrapJobTags(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, tag := range tags1 {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req1.UserId,
 				Site:      req1.Site,
 				PostingId: req1.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
 		for _, tag := range tags2 {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req2.UserId,
 				Site:      req2.Site,
 				PostingId: req2.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
 		res, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId})
@@ -431,22 +450,24 @@ func TestScrapJobTags(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, tag := range tags {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req.UserId,
 				Site:      req.Site,
 				PostingId: req.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
-		_, err = client.RemoveTag(ctx, &restapi_grpc.RemoveTagRequest{
+		isExisted, err := client.RemoveTag(ctx, &restapi_grpc.RemoveTagRequest{
 			UserId:    req.UserId,
 			Site:      req.Site,
 			PostingId: req.PostingId,
 			Tag:       tags[0],
 		})
 		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
 
 		res, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId})
 		require.NoError(t, err)
@@ -471,23 +492,25 @@ func TestScrapJobTags(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, tag := range tags1 {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req1.UserId,
 				Site:      req1.Site,
 				PostingId: req1.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
 		for _, tag := range tags2 {
-			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 				UserId:    req2.UserId,
 				Site:      req2.Site,
 				PostingId: req2.PostingId,
 				Tag:       tag,
 			})
 			require.NoError(t, err)
+			require.True(t, isExisted.IsExisted)
 		}
 
 		res2, err := client.GetScrapTags(ctx, &restapi_grpc.GetScrapTagsRequest{UserId: userId2})
@@ -525,13 +548,14 @@ func TestScrapJobTags(t *testing.T) {
 		_, err := client.AddScrapJob(ctx, req)
 		require.NoError(t, err)
 
-		_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+		isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 			UserId:    req.UserId,
 			Site:      req.Site,
 			PostingId: req.PostingId,
 			Tag:       diffTag,
 		})
 		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
 
 		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId, Tag: ptr.P(tag)})
 		require.NoError(t, err)
@@ -549,13 +573,14 @@ func TestScrapJobTags(t *testing.T) {
 		_, err := client.AddScrapJob(ctx, req)
 		require.NoError(t, err)
 
-		_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+		isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 			UserId:    req.UserId,
 			Site:      req.Site,
 			PostingId: req.PostingId,
 			Tag:       tag,
 		})
 		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
 
 		res, err := client.GetScrapJobs(ctx, &restapi_grpc.GetScrapJobsRequest{UserId: userId, Tag: ptr.P(tag)})
 		require.NoError(t, err)
@@ -586,13 +611,14 @@ func TestScrapJobTags(t *testing.T) {
 			require.NoError(t, err)
 
 			for _, tag := range tagsList[i] {
-				_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
 					UserId:    req.UserId,
 					Site:      req.Site,
 					PostingId: req.PostingId,
 					Tag:       tag,
 				})
 				require.NoError(t, err)
+				require.True(t, isExisted.IsExisted)
 			}
 		}
 
@@ -603,6 +629,85 @@ func TestScrapJobTags(t *testing.T) {
 			require.Equal(t, req.Site, res.ScrapJobs[i].Site)
 			require.Equal(t, req.PostingId, res.ScrapJobs[i].PostingId)
 		}
+	})
+
+	t.Run("return isExisted false when add tag to non-existed scrapJob", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+		IsExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    "testUserId",
+			Site:      "testSite",
+			PostingId: "testPostingId",
+			Tag:       "testTag",
+		})
+		require.NoError(t, err)
+		require.False(t, IsExisted.IsExisted)
+	})
+
+	t.Run("return isExisted false when add duplicate tag to scrapJob", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tag := "testTag"
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    req.UserId,
+			Site:      req.Site,
+			PostingId: req.PostingId,
+			Tag:       tag,
+		})
+		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
+
+		isExisted, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    req.UserId,
+			Site:      req.Site,
+			PostingId: req.PostingId,
+			Tag:       tag,
+		})
+		require.NoError(t, err)
+		require.False(t, isExisted.IsExisted)
+	})
+
+	t.Run("return isExisted false when remove tag to non-existed scrapJob", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+		IsExisted, err := client.RemoveTag(ctx, &restapi_grpc.RemoveTagRequest{
+			UserId:    "testUserId",
+			Site:      "testSite",
+			PostingId: "testPostingId",
+			Tag:       "testTag",
+		})
+		require.NoError(t, err)
+		require.False(t, IsExisted.IsExisted)
+	})
+
+	t.Run("return isExisted false when remove non-existed tag to scrapJob", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tag := "testTag"
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		isExisted, err := client.RemoveTag(ctx, &restapi_grpc.RemoveTagRequest{
+			UserId:    req.UserId,
+			Site:      req.Site,
+			PostingId: req.PostingId,
+			Tag:       tag,
+		})
+		require.NoError(t, err)
+		require.False(t, isExisted.IsExisted)
 	})
 }
 

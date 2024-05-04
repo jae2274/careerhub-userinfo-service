@@ -25,9 +25,9 @@ const _ = grpc.SupportPackageIsVersion7
 type ScrapJobGrpcClient interface {
 	GetScrapJobs(ctx context.Context, in *GetScrapJobsRequest, opts ...grpc.CallOption) (*GetScrapJobsResponse, error)
 	AddScrapJob(ctx context.Context, in *AddScrapJobRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	RemoveScrapJob(ctx context.Context, in *RemoveScrapJobRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	AddTag(ctx context.Context, in *AddTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	RemoveTag(ctx context.Context, in *RemoveTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RemoveScrapJob(ctx context.Context, in *RemoveScrapJobRequest, opts ...grpc.CallOption) (*IsExistedResponse, error)
+	AddTag(ctx context.Context, in *AddTagRequest, opts ...grpc.CallOption) (*IsExistedResponse, error)
+	RemoveTag(ctx context.Context, in *RemoveTagRequest, opts ...grpc.CallOption) (*IsExistedResponse, error)
 	GetScrapTags(ctx context.Context, in *GetScrapTagsRequest, opts ...grpc.CallOption) (*GetScrapTagsResponse, error)
 }
 
@@ -57,8 +57,8 @@ func (c *scrapJobGrpcClient) AddScrapJob(ctx context.Context, in *AddScrapJobReq
 	return out, nil
 }
 
-func (c *scrapJobGrpcClient) RemoveScrapJob(ctx context.Context, in *RemoveScrapJobRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *scrapJobGrpcClient) RemoveScrapJob(ctx context.Context, in *RemoveScrapJobRequest, opts ...grpc.CallOption) (*IsExistedResponse, error) {
+	out := new(IsExistedResponse)
 	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.ScrapJobGrpc/RemoveScrapJob", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -66,8 +66,8 @@ func (c *scrapJobGrpcClient) RemoveScrapJob(ctx context.Context, in *RemoveScrap
 	return out, nil
 }
 
-func (c *scrapJobGrpcClient) AddTag(ctx context.Context, in *AddTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *scrapJobGrpcClient) AddTag(ctx context.Context, in *AddTagRequest, opts ...grpc.CallOption) (*IsExistedResponse, error) {
+	out := new(IsExistedResponse)
 	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.ScrapJobGrpc/AddTag", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -75,8 +75,8 @@ func (c *scrapJobGrpcClient) AddTag(ctx context.Context, in *AddTagRequest, opts
 	return out, nil
 }
 
-func (c *scrapJobGrpcClient) RemoveTag(ctx context.Context, in *RemoveTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *scrapJobGrpcClient) RemoveTag(ctx context.Context, in *RemoveTagRequest, opts ...grpc.CallOption) (*IsExistedResponse, error) {
+	out := new(IsExistedResponse)
 	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.ScrapJobGrpc/RemoveTag", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -99,9 +99,9 @@ func (c *scrapJobGrpcClient) GetScrapTags(ctx context.Context, in *GetScrapTagsR
 type ScrapJobGrpcServer interface {
 	GetScrapJobs(context.Context, *GetScrapJobsRequest) (*GetScrapJobsResponse, error)
 	AddScrapJob(context.Context, *AddScrapJobRequest) (*emptypb.Empty, error)
-	RemoveScrapJob(context.Context, *RemoveScrapJobRequest) (*emptypb.Empty, error)
-	AddTag(context.Context, *AddTagRequest) (*emptypb.Empty, error)
-	RemoveTag(context.Context, *RemoveTagRequest) (*emptypb.Empty, error)
+	RemoveScrapJob(context.Context, *RemoveScrapJobRequest) (*IsExistedResponse, error)
+	AddTag(context.Context, *AddTagRequest) (*IsExistedResponse, error)
+	RemoveTag(context.Context, *RemoveTagRequest) (*IsExistedResponse, error)
 	GetScrapTags(context.Context, *GetScrapTagsRequest) (*GetScrapTagsResponse, error)
 	mustEmbedUnimplementedScrapJobGrpcServer()
 }
@@ -116,13 +116,13 @@ func (UnimplementedScrapJobGrpcServer) GetScrapJobs(context.Context, *GetScrapJo
 func (UnimplementedScrapJobGrpcServer) AddScrapJob(context.Context, *AddScrapJobRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddScrapJob not implemented")
 }
-func (UnimplementedScrapJobGrpcServer) RemoveScrapJob(context.Context, *RemoveScrapJobRequest) (*emptypb.Empty, error) {
+func (UnimplementedScrapJobGrpcServer) RemoveScrapJob(context.Context, *RemoveScrapJobRequest) (*IsExistedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveScrapJob not implemented")
 }
-func (UnimplementedScrapJobGrpcServer) AddTag(context.Context, *AddTagRequest) (*emptypb.Empty, error) {
+func (UnimplementedScrapJobGrpcServer) AddTag(context.Context, *AddTagRequest) (*IsExistedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTag not implemented")
 }
-func (UnimplementedScrapJobGrpcServer) RemoveTag(context.Context, *RemoveTagRequest) (*emptypb.Empty, error) {
+func (UnimplementedScrapJobGrpcServer) RemoveTag(context.Context, *RemoveTagRequest) (*IsExistedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveTag not implemented")
 }
 func (UnimplementedScrapJobGrpcServer) GetScrapTags(context.Context, *GetScrapTagsRequest) (*GetScrapTagsResponse, error) {

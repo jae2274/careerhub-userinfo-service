@@ -54,31 +54,31 @@ func (s *ScrapJobGrpcServer) AddScrapJob(ctx context.Context, in *restapi_grpc.A
 	return &emptypb.Empty{}, nil
 }
 
-func (s *ScrapJobGrpcServer) RemoveScrapJob(ctx context.Context, in *restapi_grpc.RemoveScrapJobRequest) (*emptypb.Empty, error) {
-	err := s.scrapJobRepo.RemoveScrapJob(ctx, in.UserId, in.Site, in.PostingId)
+func (s *ScrapJobGrpcServer) RemoveScrapJob(ctx context.Context, in *restapi_grpc.RemoveScrapJobRequest) (*restapi_grpc.IsExistedResponse, error) {
+	isExisted, err := s.scrapJobRepo.RemoveScrapJob(ctx, in.UserId, in.Site, in.PostingId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &emptypb.Empty{}, nil
+	return &restapi_grpc.IsExistedResponse{IsExisted: isExisted}, nil
 }
 
-func (s *ScrapJobGrpcServer) AddTag(ctx context.Context, in *restapi_grpc.AddTagRequest) (*emptypb.Empty, error) {
-	err := s.scrapJobRepo.AddTag(ctx, in.UserId, in.Site, in.PostingId, in.Tag)
+func (s *ScrapJobGrpcServer) AddTag(ctx context.Context, in *restapi_grpc.AddTagRequest) (*restapi_grpc.IsExistedResponse, error) {
+	isExisted, err := s.scrapJobRepo.AddTag(ctx, in.UserId, in.Site, in.PostingId, in.Tag)
 	if err != nil {
 		return nil, err
 	}
 
-	return &emptypb.Empty{}, nil
+	return &restapi_grpc.IsExistedResponse{IsExisted: isExisted}, nil
 }
 
-func (s *ScrapJobGrpcServer) RemoveTag(ctx context.Context, in *restapi_grpc.RemoveTagRequest) (*emptypb.Empty, error) {
-	err := s.scrapJobRepo.RemoveTag(ctx, in.UserId, in.Site, in.PostingId, in.Tag)
+func (s *ScrapJobGrpcServer) RemoveTag(ctx context.Context, in *restapi_grpc.RemoveTagRequest) (*restapi_grpc.IsExistedResponse, error) {
+	isExisted, err := s.scrapJobRepo.RemoveTag(ctx, in.UserId, in.Site, in.PostingId, in.Tag)
 	if err != nil {
 		return nil, err
 	}
 
-	return &emptypb.Empty{}, nil
+	return &restapi_grpc.IsExistedResponse{IsExisted: isExisted}, nil
 }
 
 func (s *ScrapJobGrpcServer) GetScrapTags(ctx context.Context, in *restapi_grpc.GetScrapTagsRequest) (*restapi_grpc.GetScrapTagsResponse, error) {

@@ -9,9 +9,9 @@ import "google/protobuf/empty.proto";
 service ScrapJobGrpc {
     rpc GetScrapJobs (GetScrapJobsRequest) returns (GetScrapJobsResponse);
     rpc AddScrapJob (AddScrapJobRequest) returns (google.protobuf.Empty);
-    rpc RemoveScrapJob (RemoveScrapJobRequest) returns (google.protobuf.Empty);
-    rpc AddTag(AddTagRequest) returns (google.protobuf.Empty);
-    rpc RemoveTag(RemoveTagRequest) returns (google.protobuf.Empty);
+    rpc RemoveScrapJob (RemoveScrapJobRequest) returns (IsExistedResponse);
+    rpc AddTag(AddTagRequest) returns (IsExistedResponse);
+    rpc RemoveTag(RemoveTagRequest) returns (IsExistedResponse);
     rpc GetScrapTags(GetScrapTagsRequest) returns (GetScrapTagsResponse);
 }
 
@@ -62,4 +62,8 @@ message GetScrapTagsRequest {
 
 message GetScrapTagsResponse {
     repeated string tags = 1;
+}
+
+message IsExistedResponse{
+    bool isExisted = 1;
 }

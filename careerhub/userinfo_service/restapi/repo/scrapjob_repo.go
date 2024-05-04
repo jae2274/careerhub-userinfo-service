@@ -12,9 +12,9 @@ import (
 type ScrapJobRepo interface {
 	GetScrapJobs(ctx context.Context, userId string, tag *string) ([]*scrapjob.ScrapJob, error)
 	AddScrapJob(ctx context.Context, scrapJob *scrapjob.ScrapJob) error
-	RemoveScrapJob(ctx context.Context, userId, site, postingId string) error
-	AddTag(ctx context.Context, userId, site, postingId, tag string) error
-	RemoveTag(ctx context.Context, userId, site, postingId, tag string) error
+	RemoveScrapJob(ctx context.Context, userId, site, postingId string) (bool, error)
+	AddTag(ctx context.Context, userId, site, postingId, tag string) (bool, error)
+	RemoveTag(ctx context.Context, userId, site, postingId, tag string) (bool, error)
 	GetScrapTags(ctx context.Context, userId string) ([]string, error)
 }
 
@@ -55,20 +55,25 @@ func (r *ScrapJobRepoImpl) AddScrapJob(ctx context.Context, scrapJob *scrapjob.S
 	return nil
 }
 
-func (r *ScrapJobRepoImpl) RemoveScrapJob(ctx context.Context, userId, site, postingId string) error {
-	_, err := r.col.DeleteOne(ctx, bson.M{
+func (r *ScrapJobRepoImpl) RemoveScrapJob(ctx context.Context, userId, site, postingId string) (bool, error) {
+	result, err := r.col.DeleteOne(ctx, bson.M{
 		scrapjob.UserIdField:    userId,
 		scrapjob.SiteField:      site,
 		scrapjob.PostingIdField: postingId,
 	})
 	if err != nil {
-		return terr.Wrap(err)
+		return false, terr.Wrap(err)
 	}
-	return nil
+
+	if result.DeletedCount == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
-func (r *ScrapJobRepoImpl) AddTag(ctx context.Context, userId, site, postingId, tag string) error {
-	_, err := r.col.UpdateOne(ctx, bson.M{
+func (r *ScrapJobRepoImpl) AddTag(ctx context.Context, userId, site, postingId, tag string) (bool, error) {
+	result, err := r.col.UpdateOne(ctx, bson.M{
 		scrapjob.UserIdField:    userId,
 		scrapjob.SiteField:      site,
 		scrapjob.PostingIdField: postingId,
@@ -77,14 +82,18 @@ func (r *ScrapJobRepoImpl) AddTag(ctx context.Context, userId, site, postingId, 
 	})
 
 	if err != nil {
-		return terr.Wrap(err)
+		return false, terr.Wrap(err)
 	}
 
-	return nil
+	if result.ModifiedCount == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
-func (r *ScrapJobRepoImpl) RemoveTag(ctx context.Context, userId, site, postingId, tag string) error {
-	_, err := r.col.UpdateOne(ctx, bson.M{
+func (r *ScrapJobRepoImpl) RemoveTag(ctx context.Context, userId, site, postingId, tag string) (bool, error) {
+	result, err := r.col.UpdateOne(ctx, bson.M{
 		scrapjob.UserIdField:    userId,
 		scrapjob.SiteField:      site,
 		scrapjob.PostingIdField: postingId,
@@ -93,10 +102,14 @@ func (r *ScrapJobRepoImpl) RemoveTag(ctx context.Context, userId, site, postingI
 	})
 
 	if err != nil {
-		return terr.Wrap(err)
+		return false, terr.Wrap(err)
 	}
 
-	return nil
+	if result.ModifiedCount == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (r *ScrapJobRepoImpl) GetScrapTags(ctx context.Context, userId string) ([]string, error) {
