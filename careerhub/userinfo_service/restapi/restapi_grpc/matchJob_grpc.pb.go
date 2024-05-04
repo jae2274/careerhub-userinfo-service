@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v4.25.1
-// source: careerhub/userinfo_service/restapi/restapi_grpc/restapi.proto
+// source: careerhub/userinfo_service/restapi/restapi_grpc/matchJob.proto
 
 package restapi_grpc
 
@@ -245,5 +245,5 @@ var RestApiGrpc_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "careerhub/userinfo_service/restapi/restapi_grpc/restapi.proto",
+	Metadata: "careerhub/userinfo_service/restapi/restapi_grpc/matchJob.proto",
 }
