@@ -8,18 +8,18 @@ import (
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/service"
 )
 
-type RestApiGrpcServer struct {
+type MatchJobGrpcServer struct {
 	conditionService service.MatchJobService
-	restapi_grpc.UnimplementedRestApiGrpcServer
+	restapi_grpc.UnimplementedMatchJobGrpcServer
 }
 
-func NewRestApiGrpcServer(conditionService service.MatchJobService) restapi_grpc.RestApiGrpcServer {
-	return &RestApiGrpcServer{
+func NewMatchJobGrpcServer(conditionService service.MatchJobService) restapi_grpc.MatchJobGrpcServer {
+	return &MatchJobGrpcServer{
 		conditionService: conditionService,
 	}
 }
 
-func (r *RestApiGrpcServer) FindMatchJob(ctx context.Context, req *restapi_grpc.FindMatchJobRequest) (*restapi_grpc.FindMatchJobResponse, error) {
+func (r *MatchJobGrpcServer) FindMatchJob(ctx context.Context, req *restapi_grpc.FindMatchJobRequest) (*restapi_grpc.FindMatchJobResponse, error) {
 	matchJob, err := r.conditionService.FindByUserId(ctx, req.UserId)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (r *RestApiGrpcServer) FindMatchJob(ctx context.Context, req *restapi_grpc.
 	}, nil
 }
 
-func (r *RestApiGrpcServer) AddCondition(ctx context.Context, req *restapi_grpc.AddConditionRequest) (*restapi_grpc.IsSuccessResponse, error) {
+func (r *MatchJobGrpcServer) AddCondition(ctx context.Context, req *restapi_grpc.AddConditionRequest) (*restapi_grpc.IsSuccessResponse, error) {
 	newCondition := convertConditionToDomain("", req.Condition.ConditionName, req.Condition.Query)
 	success, err := r.conditionService.InsertCondition(ctx, req.UserId, uint(req.LimitCount), newCondition)
 
@@ -44,7 +44,7 @@ func (r *RestApiGrpcServer) AddCondition(ctx context.Context, req *restapi_grpc.
 		IsSuccess: success,
 	}, err
 }
-func (r *RestApiGrpcServer) UpdateCondition(ctx context.Context, req *restapi_grpc.UpdateConditionRequest) (*restapi_grpc.IsSuccessResponse, error) {
+func (r *MatchJobGrpcServer) UpdateCondition(ctx context.Context, req *restapi_grpc.UpdateConditionRequest) (*restapi_grpc.IsSuccessResponse, error) {
 	updateCondition := convertConditionToDomain(req.Condition.ConditionId, req.Condition.ConditionName, req.Condition.Query)
 	success, err := r.conditionService.UpdateCondition(ctx, req.UserId, updateCondition)
 
@@ -52,7 +52,7 @@ func (r *RestApiGrpcServer) UpdateCondition(ctx context.Context, req *restapi_gr
 		IsSuccess: success,
 	}, err
 }
-func (r *RestApiGrpcServer) DeleteCondition(ctx context.Context, req *restapi_grpc.DeleteConditionRequest) (*restapi_grpc.IsSuccessResponse, error) {
+func (r *MatchJobGrpcServer) DeleteCondition(ctx context.Context, req *restapi_grpc.DeleteConditionRequest) (*restapi_grpc.IsSuccessResponse, error) {
 	success, err := r.conditionService.DeleteCondition(ctx, req.UserId, req.ConditionId)
 
 	return &restapi_grpc.IsSuccessResponse{
@@ -60,7 +60,7 @@ func (r *RestApiGrpcServer) DeleteCondition(ctx context.Context, req *restapi_gr
 	}, err
 }
 
-func (r *RestApiGrpcServer) UpdateAgreeToMail(ctx context.Context, req *restapi_grpc.UpdateAgreeToMailRequest) (*restapi_grpc.IsSuccessResponse, error) {
+func (r *MatchJobGrpcServer) UpdateAgreeToMail(ctx context.Context, req *restapi_grpc.UpdateAgreeToMailRequest) (*restapi_grpc.IsSuccessResponse, error) {
 	success, err := r.conditionService.UpdateAgreeToMail(ctx, req.UserId, req.AgreeToMail)
 
 	return &restapi_grpc.IsSuccessResponse{

@@ -54,7 +54,7 @@ func Run(ctx context.Context) {
 	runErr := make(chan error)
 
 	go func() {
-		err := restapi.Run(ctx, envVars.RestApiGrpcPort, db)
+		err := restapi.Run(ctx, envVars.MatchJobGrpcPort, db)
 		runErr <- err
 	}()
 

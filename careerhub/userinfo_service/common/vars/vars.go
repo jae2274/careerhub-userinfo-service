@@ -15,7 +15,7 @@ type Vars struct {
 	MongoUri          string
 	DbName            string
 	DBUser            *DBUser
-	RestApiGrpcPort   int
+	MatchJobGrpcPort  int
 	SuggesterGrpcPort int
 }
 
@@ -53,14 +53,14 @@ func Variables() (*Vars, error) {
 		return nil, err
 	}
 
-	restApiGrpcPort, err := getFromEnv("RESTAPI_GRPC_PORT")
+	matchJobGrpcPort, err := getFromEnv("RESTAPI_GRPC_PORT")
 	if err != nil {
 		return nil, err
 	}
 
-	restApiGrpcPortInt, err := strconv.ParseInt(restApiGrpcPort, 10, 32)
+	matchJobGrpcPortInt, err := strconv.ParseInt(matchJobGrpcPort, 10, 32)
 	if err != nil {
-		return nil, fmt.Errorf("RESTAPI_GRPC_PORT is not integer.\tREST_API_PORT: %s", restApiGrpcPort)
+		return nil, fmt.Errorf("RESTAPI_GRPC_PORT is not integer.\tREST_API_PORT: %s", matchJobGrpcPort)
 	}
 
 	suggesterGrpcPort, err := getFromEnv("SUGGESTER_GRPC_PORT")
@@ -76,7 +76,7 @@ func Variables() (*Vars, error) {
 		MongoUri:          mongoUri,
 		DBUser:            dbUser,
 		DbName:            dbName,
-		RestApiGrpcPort:   int(restApiGrpcPortInt),
+		MatchJobGrpcPort:  int(matchJobGrpcPortInt),
 		SuggesterGrpcPort: int(suggesterGrpcPortInt),
 	}, nil
 }

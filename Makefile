@@ -18,7 +18,7 @@ image_build:
 ## run: builds and runs the application
 run: build
 	@echo "Starting..."
-	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} RESTAPI_GRPC_PORT=${RESTAPI_GRPC_PORT} ./${BINARY_NAME} 
+	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} RESTAPI_GRPC_PORT=${RESTAPI_GRPC_PORT} SUGGESTER_GRPC_PORT=${SUGGESTER_GRPC_PORT} ./${BINARY_NAME} 
 	@echo "Started!"
 
 ## clean: runs go clean and deletes binaries
@@ -47,6 +47,6 @@ proto:
 ## test: runs all tests
 test:	
 	@echo "Testing..."
-	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} RESTAPI_GRPC_PORT=${RESTAPI_GRPC_PORT} go test -p 1 -timeout 60s ./test/...
+	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} RESTAPI_GRPC_PORT=${RESTAPI_GRPC_PORT} SUGGESTER_GRPC_PORT=${SUGGESTER_GRPC_PORT} go test -p 1 -timeout 60s ./test/...
 	
 

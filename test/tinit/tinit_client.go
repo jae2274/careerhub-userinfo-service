@@ -14,9 +14,9 @@ func InitSuggesterClient(t *testing.T) suggester_grpc.UserinfoClient {
 	return suggester_grpc.NewUserinfoClient(conn)
 }
 
-func InitRestapiClient(t *testing.T) restapi_grpc.RestApiGrpcClient {
+func InitRestapiClient(t *testing.T) restapi_grpc.MatchJobGrpcClient {
 	envVars := InitEnvVars(t)
-	conn := InitGrpcClient(t, envVars.RestApiGrpcPort)
+	conn := InitGrpcClient(t, envVars.MatchJobGrpcPort)
 
-	return restapi_grpc.NewRestApiGrpcClient(conn)
+	return restapi_grpc.NewMatchJobGrpcClient(conn)
 }

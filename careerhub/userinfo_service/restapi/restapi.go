@@ -19,7 +19,7 @@ import (
 func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
 	matchJobRepo := repo.NewMatchJobRepo(db)
 	conditionService := service.NewMatchJobService(matchJobRepo)
-	restApiService := server.NewRestApiGrpcServer(conditionService)
+	restApiService := server.NewMatchJobGrpcServer(conditionService)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
@@ -29,7 +29,7 @@ func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
 	llog.Msg("Start restapi grpc server").Level(llog.INFO).Data("port", grpcPort).Log(ctx)
 
 	grpcServer := grpc.NewServer(utils.Middlewares()...)
-	restapi_grpc.RegisterRestApiGrpcServer(grpcServer, restApiService)
+	restapi_grpc.RegisterMatchJobGrpcServer(grpcServer, restApiService)
 
 	err = grpcServer.Serve(listener)
 	if err != nil {

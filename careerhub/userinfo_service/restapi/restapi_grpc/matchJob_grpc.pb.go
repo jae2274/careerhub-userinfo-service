@@ -18,10 +18,10 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// RestApiGrpcClient is the client API for RestApiGrpc service.
+// MatchJobGrpcClient is the client API for MatchJobGrpc service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type RestApiGrpcClient interface {
+type MatchJobGrpcClient interface {
 	FindMatchJob(ctx context.Context, in *FindMatchJobRequest, opts ...grpc.CallOption) (*FindMatchJobResponse, error)
 	AddCondition(ctx context.Context, in *AddConditionRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error)
 	UpdateCondition(ctx context.Context, in *UpdateConditionRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error)
@@ -29,219 +29,219 @@ type RestApiGrpcClient interface {
 	UpdateAgreeToMail(ctx context.Context, in *UpdateAgreeToMailRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error)
 }
 
-type restApiGrpcClient struct {
+type matchJobGrpcClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRestApiGrpcClient(cc grpc.ClientConnInterface) RestApiGrpcClient {
-	return &restApiGrpcClient{cc}
+func NewMatchJobGrpcClient(cc grpc.ClientConnInterface) MatchJobGrpcClient {
+	return &matchJobGrpcClient{cc}
 }
 
-func (c *restApiGrpcClient) FindMatchJob(ctx context.Context, in *FindMatchJobRequest, opts ...grpc.CallOption) (*FindMatchJobResponse, error) {
+func (c *matchJobGrpcClient) FindMatchJob(ctx context.Context, in *FindMatchJobRequest, opts ...grpc.CallOption) (*FindMatchJobResponse, error) {
 	out := new(FindMatchJobResponse)
-	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/FindMatchJob", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/FindMatchJob", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *restApiGrpcClient) AddCondition(ctx context.Context, in *AddConditionRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error) {
+func (c *matchJobGrpcClient) AddCondition(ctx context.Context, in *AddConditionRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error) {
 	out := new(IsSuccessResponse)
-	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/AddCondition", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/AddCondition", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *restApiGrpcClient) UpdateCondition(ctx context.Context, in *UpdateConditionRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error) {
+func (c *matchJobGrpcClient) UpdateCondition(ctx context.Context, in *UpdateConditionRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error) {
 	out := new(IsSuccessResponse)
-	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/UpdateCondition", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/UpdateCondition", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *restApiGrpcClient) DeleteCondition(ctx context.Context, in *DeleteConditionRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error) {
+func (c *matchJobGrpcClient) DeleteCondition(ctx context.Context, in *DeleteConditionRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error) {
 	out := new(IsSuccessResponse)
-	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/DeleteCondition", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/DeleteCondition", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *restApiGrpcClient) UpdateAgreeToMail(ctx context.Context, in *UpdateAgreeToMailRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error) {
+func (c *matchJobGrpcClient) UpdateAgreeToMail(ctx context.Context, in *UpdateAgreeToMailRequest, opts ...grpc.CallOption) (*IsSuccessResponse, error) {
 	out := new(IsSuccessResponse)
-	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/UpdateAgreeToMail", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/UpdateAgreeToMail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RestApiGrpcServer is the server API for RestApiGrpc service.
-// All implementations must embed UnimplementedRestApiGrpcServer
+// MatchJobGrpcServer is the server API for MatchJobGrpc service.
+// All implementations must embed UnimplementedMatchJobGrpcServer
 // for forward compatibility
-type RestApiGrpcServer interface {
+type MatchJobGrpcServer interface {
 	FindMatchJob(context.Context, *FindMatchJobRequest) (*FindMatchJobResponse, error)
 	AddCondition(context.Context, *AddConditionRequest) (*IsSuccessResponse, error)
 	UpdateCondition(context.Context, *UpdateConditionRequest) (*IsSuccessResponse, error)
 	DeleteCondition(context.Context, *DeleteConditionRequest) (*IsSuccessResponse, error)
 	UpdateAgreeToMail(context.Context, *UpdateAgreeToMailRequest) (*IsSuccessResponse, error)
-	mustEmbedUnimplementedRestApiGrpcServer()
+	mustEmbedUnimplementedMatchJobGrpcServer()
 }
 
-// UnimplementedRestApiGrpcServer must be embedded to have forward compatible implementations.
-type UnimplementedRestApiGrpcServer struct {
+// UnimplementedMatchJobGrpcServer must be embedded to have forward compatible implementations.
+type UnimplementedMatchJobGrpcServer struct {
 }
 
-func (UnimplementedRestApiGrpcServer) FindMatchJob(context.Context, *FindMatchJobRequest) (*FindMatchJobResponse, error) {
+func (UnimplementedMatchJobGrpcServer) FindMatchJob(context.Context, *FindMatchJobRequest) (*FindMatchJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindMatchJob not implemented")
 }
-func (UnimplementedRestApiGrpcServer) AddCondition(context.Context, *AddConditionRequest) (*IsSuccessResponse, error) {
+func (UnimplementedMatchJobGrpcServer) AddCondition(context.Context, *AddConditionRequest) (*IsSuccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddCondition not implemented")
 }
-func (UnimplementedRestApiGrpcServer) UpdateCondition(context.Context, *UpdateConditionRequest) (*IsSuccessResponse, error) {
+func (UnimplementedMatchJobGrpcServer) UpdateCondition(context.Context, *UpdateConditionRequest) (*IsSuccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCondition not implemented")
 }
-func (UnimplementedRestApiGrpcServer) DeleteCondition(context.Context, *DeleteConditionRequest) (*IsSuccessResponse, error) {
+func (UnimplementedMatchJobGrpcServer) DeleteCondition(context.Context, *DeleteConditionRequest) (*IsSuccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCondition not implemented")
 }
-func (UnimplementedRestApiGrpcServer) UpdateAgreeToMail(context.Context, *UpdateAgreeToMailRequest) (*IsSuccessResponse, error) {
+func (UnimplementedMatchJobGrpcServer) UpdateAgreeToMail(context.Context, *UpdateAgreeToMailRequest) (*IsSuccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateAgreeToMail not implemented")
 }
-func (UnimplementedRestApiGrpcServer) mustEmbedUnimplementedRestApiGrpcServer() {}
+func (UnimplementedMatchJobGrpcServer) mustEmbedUnimplementedMatchJobGrpcServer() {}
 
-// UnsafeRestApiGrpcServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RestApiGrpcServer will
+// UnsafeMatchJobGrpcServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MatchJobGrpcServer will
 // result in compilation errors.
-type UnsafeRestApiGrpcServer interface {
-	mustEmbedUnimplementedRestApiGrpcServer()
+type UnsafeMatchJobGrpcServer interface {
+	mustEmbedUnimplementedMatchJobGrpcServer()
 }
 
-func RegisterRestApiGrpcServer(s grpc.ServiceRegistrar, srv RestApiGrpcServer) {
-	s.RegisterService(&RestApiGrpc_ServiceDesc, srv)
+func RegisterMatchJobGrpcServer(s grpc.ServiceRegistrar, srv MatchJobGrpcServer) {
+	s.RegisterService(&MatchJobGrpc_ServiceDesc, srv)
 }
 
-func _RestApiGrpc_FindMatchJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MatchJobGrpc_FindMatchJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FindMatchJobRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RestApiGrpcServer).FindMatchJob(ctx, in)
+		return srv.(MatchJobGrpcServer).FindMatchJob(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/FindMatchJob",
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/FindMatchJob",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RestApiGrpcServer).FindMatchJob(ctx, req.(*FindMatchJobRequest))
+		return srv.(MatchJobGrpcServer).FindMatchJob(ctx, req.(*FindMatchJobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RestApiGrpc_AddCondition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MatchJobGrpc_AddCondition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddConditionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RestApiGrpcServer).AddCondition(ctx, in)
+		return srv.(MatchJobGrpcServer).AddCondition(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/AddCondition",
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/AddCondition",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RestApiGrpcServer).AddCondition(ctx, req.(*AddConditionRequest))
+		return srv.(MatchJobGrpcServer).AddCondition(ctx, req.(*AddConditionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RestApiGrpc_UpdateCondition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MatchJobGrpc_UpdateCondition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateConditionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RestApiGrpcServer).UpdateCondition(ctx, in)
+		return srv.(MatchJobGrpcServer).UpdateCondition(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/UpdateCondition",
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/UpdateCondition",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RestApiGrpcServer).UpdateCondition(ctx, req.(*UpdateConditionRequest))
+		return srv.(MatchJobGrpcServer).UpdateCondition(ctx, req.(*UpdateConditionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RestApiGrpc_DeleteCondition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MatchJobGrpc_DeleteCondition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteConditionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RestApiGrpcServer).DeleteCondition(ctx, in)
+		return srv.(MatchJobGrpcServer).DeleteCondition(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/DeleteCondition",
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/DeleteCondition",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RestApiGrpcServer).DeleteCondition(ctx, req.(*DeleteConditionRequest))
+		return srv.(MatchJobGrpcServer).DeleteCondition(ctx, req.(*DeleteConditionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RestApiGrpc_UpdateAgreeToMail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MatchJobGrpc_UpdateAgreeToMail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateAgreeToMailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RestApiGrpcServer).UpdateAgreeToMail(ctx, in)
+		return srv.(MatchJobGrpcServer).UpdateAgreeToMail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/careerhub.userinfo_service.restapi_grpc.RestApiGrpc/UpdateAgreeToMail",
+		FullMethod: "/careerhub.userinfo_service.restapi_grpc.MatchJobGrpc/UpdateAgreeToMail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RestApiGrpcServer).UpdateAgreeToMail(ctx, req.(*UpdateAgreeToMailRequest))
+		return srv.(MatchJobGrpcServer).UpdateAgreeToMail(ctx, req.(*UpdateAgreeToMailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// RestApiGrpc_ServiceDesc is the grpc.ServiceDesc for RestApiGrpc service.
+// MatchJobGrpc_ServiceDesc is the grpc.ServiceDesc for MatchJobGrpc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var RestApiGrpc_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "careerhub.userinfo_service.restapi_grpc.RestApiGrpc",
-	HandlerType: (*RestApiGrpcServer)(nil),
+var MatchJobGrpc_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "careerhub.userinfo_service.restapi_grpc.MatchJobGrpc",
+	HandlerType: (*MatchJobGrpcServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "FindMatchJob",
-			Handler:    _RestApiGrpc_FindMatchJob_Handler,
+			Handler:    _MatchJobGrpc_FindMatchJob_Handler,
 		},
 		{
 			MethodName: "AddCondition",
-			Handler:    _RestApiGrpc_AddCondition_Handler,
+			Handler:    _MatchJobGrpc_AddCondition_Handler,
 		},
 		{
 			MethodName: "UpdateCondition",
-			Handler:    _RestApiGrpc_UpdateCondition_Handler,
+			Handler:    _MatchJobGrpc_UpdateCondition_Handler,
 		},
 		{
 			MethodName: "DeleteCondition",
-			Handler:    _RestApiGrpc_DeleteCondition_Handler,
+			Handler:    _MatchJobGrpc_DeleteCondition_Handler,
 		},
 		{
 			MethodName: "UpdateAgreeToMail",
-			Handler:    _RestApiGrpc_UpdateAgreeToMail_Handler,
+			Handler:    _MatchJobGrpc_UpdateAgreeToMail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
