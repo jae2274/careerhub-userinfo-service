@@ -18,6 +18,7 @@ type ScrapJobRepo interface {
 	RemoveTag(ctx context.Context, userId, site, postingId, tag string) (bool, error)
 	GetScrapTags(ctx context.Context, userId string) ([]string, error)
 	GetScrapJobsById(ctx context.Context, userId string, jobPostingIds []*restapi_grpc.JobPostingId) ([]*scrapjob.ScrapJob, error)
+	GetScrapJobsByTag(ctx context.Context, userId, tag string) ([]*scrapjob.ScrapJob, error)
 }
 
 type ScrapJobRepoImpl struct {
@@ -143,6 +144,22 @@ func (r *ScrapJobRepoImpl) GetScrapJobsById(ctx context.Context, userId string, 
 		}
 	}
 	filter := bson.M{scrapjob.UserIdField: userId, "$or": jobPostingIdsFilter}
+	cur, err := r.col.Find(ctx, filter)
+	if err != nil {
+		return nil, terr.Wrap(err)
+	}
+
+	var scrapJobs []*scrapjob.ScrapJob
+	err = cur.All(ctx, &scrapJobs)
+	if err != nil {
+		return nil, terr.Wrap(err)
+	}
+
+	return scrapJobs, nil
+}
+
+func (r *ScrapJobRepoImpl) GetScrapJobsByTag(ctx context.Context, userId, tag string) ([]*scrapjob.ScrapJob, error) {
+	filter := bson.M{scrapjob.UserIdField: userId, scrapjob.TagsField: tag}
 	cur, err := r.col.Find(ctx, filter)
 	if err != nil {
 		return nil, terr.Wrap(err)

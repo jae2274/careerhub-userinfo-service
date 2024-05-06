@@ -202,6 +202,12 @@ func TestScrapJobGrpc(t *testing.T) {
 			PostingId: "otherPostingId",
 		})
 		require.NoError(t, err)
+		_, err = client.AddScrapJob(ctx, &restapi_grpc.AddScrapJobRequest{
+			UserId:    "otherUserId",
+			Site:      "otherSite",
+			PostingId: "otherPostingId",
+		})
+		require.NoError(t, err)
 
 		res, err := client.GetScrapJobsById(ctx, &restapi_grpc.GetScrapJobsByIdRequest{
 			UserId:        userId,
@@ -214,6 +220,80 @@ func TestScrapJobGrpc(t *testing.T) {
 			require.Equal(t, jobPostingId.Site, res.ScrapJobs[i].Site)
 			require.Equal(t, jobPostingId.PostingId, res.ScrapJobs[i].PostingId)
 		}
+	})
+
+	t.Run("return empty cause didnt scrap", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+		res, err := client.GetScrapJobsByTag(ctx, &restapi_grpc.GetScrapJobsByTagRequest{
+			UserId: "testUserId",
+			Tag:    "testTag",
+		})
+		require.NoError(t, err)
+		require.Empty(t, res.ScrapJobs)
+	})
+
+	t.Run("return scrapJobs by tag", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		tag := "testTag"
+		reqs := []*restapi_grpc.AddScrapJobRequest{
+			newAddScrapJobRequest(userId, 1),
+			newAddScrapJobRequest(userId, 2),
+		}
+
+		for _, req := range reqs {
+			_, err := client.AddScrapJob(ctx, req)
+			require.NoError(t, err)
+		}
+
+		isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    userId,
+			Site:      reqs[0].Site,
+			PostingId: reqs[0].PostingId,
+			Tag:       tag,
+		})
+		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
+
+		isExisted, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    userId,
+			Site:      reqs[1].Site,
+			PostingId: reqs[1].PostingId,
+			Tag:       "otherTag",
+		})
+		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
+
+		//다른 유저의 scrapJob에도 같은 tag를 추가해봄
+		_, err = client.AddScrapJob(ctx, &restapi_grpc.AddScrapJobRequest{
+			UserId:    "otherUserId",
+			Site:      reqs[0].Site,
+			PostingId: reqs[0].PostingId,
+		})
+		require.NoError(t, err)
+		isExisted, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    "otherUserId",
+			Site:      reqs[0].Site,
+			PostingId: reqs[0].PostingId,
+			Tag:       tag,
+		})
+		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
+
+		res, err := client.GetScrapJobsByTag(ctx, &restapi_grpc.GetScrapJobsByTagRequest{
+			UserId: userId,
+			Tag:    tag,
+		})
+
+		require.NoError(t, err)
+		require.Len(t, res.ScrapJobs, 1)
+		require.Equal(t, reqs[0].Site, res.ScrapJobs[0].Site)
+		require.Equal(t, reqs[0].PostingId, res.ScrapJobs[0].PostingId)
 	})
 }
 
