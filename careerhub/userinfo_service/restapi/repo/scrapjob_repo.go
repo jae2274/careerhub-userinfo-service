@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/scrapjob"
+	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi/restapi_grpc"
 	"github.com/jae2274/goutils/terr"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,6 +17,7 @@ type ScrapJobRepo interface {
 	AddTag(ctx context.Context, userId, site, postingId, tag string) (bool, error)
 	RemoveTag(ctx context.Context, userId, site, postingId, tag string) (bool, error)
 	GetScrapTags(ctx context.Context, userId string) ([]string, error)
+	GetScrapJobsById(ctx context.Context, userId string, jobPostingIds []*restapi_grpc.JobPostingId) ([]*scrapjob.ScrapJob, error)
 }
 
 type ScrapJobRepoImpl struct {
@@ -130,4 +132,27 @@ func (r *ScrapJobRepoImpl) GetScrapTags(ctx context.Context, userId string) ([]s
 	}
 
 	return tags, nil
+}
+
+func (r *ScrapJobRepoImpl) GetScrapJobsById(ctx context.Context, userId string, jobPostingIds []*restapi_grpc.JobPostingId) ([]*scrapjob.ScrapJob, error) {
+	jobPostingIdsFilter := make([]bson.M, len(jobPostingIds))
+	for i, jobPostingId := range jobPostingIds {
+		jobPostingIdsFilter[i] = bson.M{
+			scrapjob.SiteField:      jobPostingId.Site,
+			scrapjob.PostingIdField: jobPostingId.PostingId,
+		}
+	}
+	filter := bson.M{scrapjob.UserIdField: userId, "$or": jobPostingIdsFilter}
+	cur, err := r.col.Find(ctx, filter)
+	if err != nil {
+		return nil, terr.Wrap(err)
+	}
+
+	var scrapJobs []*scrapjob.ScrapJob
+	err = cur.All(ctx, &scrapJobs)
+	if err != nil {
+		return nil, terr.Wrap(err)
+	}
+
+	return scrapJobs, nil
 }

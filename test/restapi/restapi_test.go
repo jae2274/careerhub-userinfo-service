@@ -156,6 +156,65 @@ func TestScrapJobGrpc(t *testing.T) {
 		require.NoError(t, err)
 		require.False(t, IsExisted.IsExisted)
 	})
+
+	t.Run("return empty scrapJob cause did not scrap", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		jobPostingIds := []*restapi_grpc.JobPostingId{
+			{Site: "testSite", PostingId: "testPostingId1"},
+			{Site: "testSite", PostingId: "testPostingId2"},
+			{Site: "testSite", PostingId: "testPostingId3"},
+		}
+		res, err := client.GetScrapJobsById(ctx, &restapi_grpc.GetScrapJobsByIdRequest{
+			UserId:        "testUserId",
+			JobPostingIds: jobPostingIds,
+		})
+
+		require.NoError(t, err)
+		require.Empty(t, res.ScrapJobs)
+	})
+
+	t.Run("return scrapJob cause scrap", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+
+		userId := "testUserId"
+		jobPostingIds := []*restapi_grpc.JobPostingId{
+			{Site: "testSite1", PostingId: "testPostingId1"},
+			{Site: "testSite2", PostingId: "testPostingId2"},
+			{Site: "testSite3", PostingId: "testPostingId3"},
+		}
+
+		for _, jobPostingId := range jobPostingIds[:2] {
+			_, err := client.AddScrapJob(ctx, &restapi_grpc.AddScrapJobRequest{
+				UserId:    userId,
+				Site:      jobPostingId.Site,
+				PostingId: jobPostingId.PostingId,
+			})
+			require.NoError(t, err)
+		}
+		_, err := client.AddScrapJob(ctx, &restapi_grpc.AddScrapJobRequest{
+			UserId:    userId,
+			Site:      "otherSite",
+			PostingId: "otherPostingId",
+		})
+		require.NoError(t, err)
+
+		res, err := client.GetScrapJobsById(ctx, &restapi_grpc.GetScrapJobsByIdRequest{
+			UserId:        userId,
+			JobPostingIds: jobPostingIds,
+		})
+
+		require.NoError(t, err)
+		require.Len(t, res.ScrapJobs, 2)
+		for i, jobPostingId := range jobPostingIds[:2] {
+			require.Equal(t, jobPostingId.Site, res.ScrapJobs[i].Site)
+			require.Equal(t, jobPostingId.PostingId, res.ScrapJobs[i].PostingId)
+		}
+	})
 }
 
 func TestTags(t *testing.T) {
@@ -660,7 +719,7 @@ func TestTags(t *testing.T) {
 		require.False(t, IsExisted.IsExisted)
 	})
 
-	t.Run("return isExisted false when remove non-existed tag to scrapJob", func(t *testing.T) {
+	t.Run("return isExisted true when remove non-existed tag to scrapJob", func(t *testing.T) { //스크랩한 채용공고 대상으로 태그를 삭제할 때, 태그가 존재하지 않아도 성공해야 합니다.
 		tinit.InitDB(t)
 		ctx := context.Background()
 		client := tinit.InitScrapJobGrpcClient(t)
@@ -678,7 +737,7 @@ func TestTags(t *testing.T) {
 			Tag:       tag,
 		})
 		require.NoError(t, err)
-		require.False(t, isExisted.IsExisted)
+		require.True(t, isExisted.IsExisted)
 	})
 }
 

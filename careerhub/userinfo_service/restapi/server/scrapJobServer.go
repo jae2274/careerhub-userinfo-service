@@ -26,14 +26,7 @@ func (s *ScrapJobGrpcServer) GetScrapJobs(ctx context.Context, in *restapi_grpc.
 		return nil, err
 	}
 
-	grpcScrapJobs := make([]*restapi_grpc.ScrapJob, len(scrapJobs))
-	for i, scrapJob := range scrapJobs {
-		grpcScrapJobs[i] = &restapi_grpc.ScrapJob{
-			Site:      scrapJob.Site,
-			PostingId: scrapJob.PostingId,
-			Tags:      scrapJob.Tags,
-		}
-	}
+	grpcScrapJobs := convertScrapJobsToGrpc(scrapJobs)
 
 	return &restapi_grpc.GetScrapJobsResponse{ScrapJobs: grpcScrapJobs}, nil
 }
@@ -88,4 +81,27 @@ func (s *ScrapJobGrpcServer) GetScrapTags(ctx context.Context, in *restapi_grpc.
 	}
 
 	return &restapi_grpc.GetScrapTagsResponse{Tags: tags}, nil
+}
+
+func (s *ScrapJobGrpcServer) GetScrapJobsById(ctx context.Context, in *restapi_grpc.GetScrapJobsByIdRequest) (*restapi_grpc.GetScrapJobsResponse, error) {
+	scrapJobs, err := s.scrapJobRepo.GetScrapJobsById(ctx, in.UserId, in.JobPostingIds)
+	if err != nil {
+		return nil, err
+	}
+
+	grpcScrapJobs := convertScrapJobsToGrpc(scrapJobs)
+
+	return &restapi_grpc.GetScrapJobsResponse{ScrapJobs: grpcScrapJobs}, nil
+}
+
+func convertScrapJobsToGrpc(scrapJobs []*scrapjob.ScrapJob) []*restapi_grpc.ScrapJob {
+	grpcScrapJobs := make([]*restapi_grpc.ScrapJob, len(scrapJobs))
+	for i, scrapJob := range scrapJobs {
+		grpcScrapJobs[i] = &restapi_grpc.ScrapJob{
+			Site:      scrapJob.Site,
+			PostingId: scrapJob.PostingId,
+			Tags:      scrapJob.Tags,
+		}
+	}
+	return grpcScrapJobs
 }
