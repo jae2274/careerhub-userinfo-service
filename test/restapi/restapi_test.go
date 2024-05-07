@@ -195,6 +195,14 @@ func TestScrapJobGrpc(t *testing.T) {
 				PostingId: jobPostingId.PostingId,
 			})
 			require.NoError(t, err)
+
+			_, err = client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+				UserId:    userId,
+				Site:      jobPostingId.Site,
+				PostingId: jobPostingId.PostingId,
+				Tag:       "testTag",
+			})
+			require.NoError(t, err)
 		}
 		_, err := client.AddScrapJob(ctx, &restapi_grpc.AddScrapJobRequest{
 			UserId:    userId,
@@ -219,6 +227,8 @@ func TestScrapJobGrpc(t *testing.T) {
 		for i, jobPostingId := range jobPostingIds[:2] {
 			require.Equal(t, jobPostingId.Site, res.ScrapJobs[i].Site)
 			require.Equal(t, jobPostingId.PostingId, res.ScrapJobs[i].PostingId)
+			require.Len(t, res.ScrapJobs[i].Tags, 1)
+			require.Equal(t, "testTag", res.ScrapJobs[i].Tags[0])
 		}
 	})
 }

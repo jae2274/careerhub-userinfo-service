@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/matchjob"
+	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/domain/scrapjob"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/mongocfg"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/common/vars"
 	"github.com/jae2274/careerhub-userinfo-service/careerhub/userinfo_service/restapi"
@@ -72,7 +73,7 @@ func Run(ctx context.Context) {
 }
 
 func initCollections(db *mongo.Database) error {
-	_, err := mongocfg.InitCollections(db, &matchjob.MatchJob{})
+	_, err := mongocfg.InitCollections(db, &matchjob.MatchJob{}, &scrapjob.ScrapJob{})
 	if err != nil {
 		return err
 	}
