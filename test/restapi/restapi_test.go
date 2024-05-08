@@ -755,6 +755,85 @@ func TestTags(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, isExisted.IsExisted)
 	})
+
+	t.Run("return empty untagged scrapJobs", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+		userId := "testUserId"
+
+		res, err := client.GetUntaggedScrapJobs(ctx, &restapi_grpc.GetUntaggedScrapJobsRequest{UserId: userId})
+		require.NoError(t, err)
+		require.Len(t, res.ScrapJobs, 0)
+	})
+
+	t.Run("return untagged scrapJobs if added", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+		userId := "testUserId"
+
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		res, err := client.GetUntaggedScrapJobs(ctx, &restapi_grpc.GetUntaggedScrapJobsRequest{UserId: userId})
+		require.NoError(t, err)
+		require.Len(t, res.ScrapJobs, 1)
+		require.Equal(t, req.Site, res.ScrapJobs[0].Site)
+		require.Equal(t, req.PostingId, res.ScrapJobs[0].PostingId)
+		require.Len(t, res.ScrapJobs[0].Tags, 0)
+	})
+
+	t.Run("return untagged scrapJobs if added multiple scrapJobs", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+		userId := "testUserId"
+
+		req1 := newAddScrapJobRequest(userId, 1)
+		req2 := newAddScrapJobRequest(userId, 2)
+		req3 := newAddScrapJobRequest(userId, 3)
+		reqs := []*restapi_grpc.AddScrapJobRequest{req1, req2, req3}
+
+		for _, req := range reqs {
+			_, err := client.AddScrapJob(ctx, req)
+			require.NoError(t, err)
+		}
+
+		res, err := client.GetUntaggedScrapJobs(ctx, &restapi_grpc.GetUntaggedScrapJobsRequest{UserId: userId})
+		require.NoError(t, err)
+		require.Len(t, res.ScrapJobs, len(reqs))
+		for i, req := range reqs {
+			require.Equal(t, req.Site, res.ScrapJobs[i].Site)
+			require.Equal(t, req.PostingId, res.ScrapJobs[i].PostingId)
+			require.Len(t, res.ScrapJobs[i].Tags, 0)
+		}
+	})
+
+	t.Run("return empty untagged scrapJobs when scrapJobs tagged", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+		client := tinit.InitScrapJobGrpcClient(t)
+		userId := "testUserId"
+
+		req := newAddScrapJobRequest(userId, 1)
+		_, err := client.AddScrapJob(ctx, req)
+		require.NoError(t, err)
+
+		isExisted, err := client.AddTag(ctx, &restapi_grpc.AddTagRequest{
+			UserId:    req.UserId,
+			Site:      req.Site,
+			PostingId: req.PostingId,
+			Tag:       "testTag",
+		})
+		require.NoError(t, err)
+		require.True(t, isExisted.IsExisted)
+
+		res, err := client.GetUntaggedScrapJobs(ctx, &restapi_grpc.GetUntaggedScrapJobsRequest{UserId: userId})
+		require.NoError(t, err)
+		require.Len(t, res.ScrapJobs, 0)
+	})
 }
 
 func newAddScrapJobRequest(userId string, num int) *restapi_grpc.AddScrapJobRequest {
