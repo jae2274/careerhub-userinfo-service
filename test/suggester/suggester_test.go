@@ -17,6 +17,8 @@ func TestSuggesterGrpc(t *testing.T) {
 	defer cancelFunc()
 
 	t.Run("returm empty", func(t *testing.T) {
+		tinit.InitDB(t)
+
 		ctx := context.Background()
 		client := tinit.InitSuggesterClient(t)
 		conditions, err := client.GetConditions(ctx, &emptypb.Empty{})
