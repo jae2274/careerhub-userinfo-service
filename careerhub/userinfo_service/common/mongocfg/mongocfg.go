@@ -17,6 +17,7 @@ func NewDatabase(uri string, dbName string, dbUser *vars.DBUser) (*mongo.Databas
 	defer cancel()
 
 	clientOptions := options.Client().ApplyURI(uri)
+	clientOptions.SetMaxConnIdleTime(10 * time.Second)
 
 	if dbUser != nil {
 		credential := options.Credential{
